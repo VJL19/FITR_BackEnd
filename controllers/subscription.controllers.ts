@@ -274,6 +274,10 @@ const deleteSubscriptionController = (req: Request, res: Response) => {
   connection.query(query, [SubscriptionID], (error, result) => {
     if (error) return res.status(400).json({ error: error, status: 400 });
 
+    for (var i in clients) {
+      clients[i].emit("refresh_subscriptionPage");
+    }
+
     return res.status(200).json({
       message: "This subscription is deleted successfully!",
       result: result,

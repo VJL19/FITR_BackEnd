@@ -18,5 +18,6 @@ interface IUser {
   Gender: string;
   RFIDNumber?: string;
   Activation?: string;
+  Role?: string;
 }
 export default IUser;

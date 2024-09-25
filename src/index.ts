@@ -28,6 +28,7 @@ import {
   admin_routes,
   records_routes,
 } from "../routes/index.routes";
+import cookieParser from "cookie-parser";
 //initialize the top of the function express.
 const app = express();
 
@@ -45,6 +46,7 @@ const config = loadConfig();
 //middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 app.use(
   cors({
     methods: ["GET", "POST", "PUT", "DELETE"],

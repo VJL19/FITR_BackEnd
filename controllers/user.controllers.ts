@@ -103,7 +103,7 @@ const registerController = async (
     "not activated",
   ];
   const query =
-    "INSERT INTO tbl_users (`LastName`, `FirstName`, `MiddleName`, `Age`, `Birthday`, `ContactNumber`, `Address`, `Email`, `Height`, `Weight`, `Username`, `Password`, `ConfirmPassword`, `ProfilePic`, `Gender`, `SubscriptionType`, `Activation`, `RFIDNumber`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)";
+    "INSERT INTO tbl_users (`LastName`, `FirstName`, `MiddleName`, `Age`, `Birthday`, `ContactNumber`, `Address`, `Email`, `Height`, `Weight`, `Username`, `Password`, `ConfirmPassword`, `ProfilePic`, `Gender`, `SubscriptionType`, `Activation`, `RFIDNumber`, `Role`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, 'User')";
 
   connection.query(
     query,
@@ -201,14 +201,15 @@ const adminRegisterUserController = async (req: Request, res: Response) => {
     Username,
     encryptedPass,
     encryptedConfirmpass,
-    ProfilePic,
+    "default_poster.png",
     Gender,
     SubscriptionType,
     "not activated",
     RFIDNumber,
+    "User",
   ];
   const query =
-    "INSERT INTO tbl_users (`LastName`, `FirstName`, `MiddleName`, `Age`, `Birthday`, `ContactNumber`, `Address`, `Email`, `Height`, `Weight`, `Username`, `Password`, `ConfirmPassword`, `ProfilePic`, `Gender`, `SubscriptionType`, `Activation`, `RFIDNumber`) VALUES (?)";
+    "INSERT INTO tbl_users (`LastName`, `FirstName`, `MiddleName`, `Age`, `Birthday`, `ContactNumber`, `Address`, `Email`, `Height`, `Weight`, `Username`, `Password`, `ConfirmPassword`, `ProfilePic`, `Gender`, `SubscriptionType`, `Activation`, `RFIDNumber`, `Role`) VALUES (?)";
 
   connection.query(query, [values], (error, result: IUser[]) => {
     if (error)
@@ -330,6 +331,12 @@ const loginController = async (req: Request, res: Response) => {
       });
     }
 
+    if (result[0].Role === "Admin") {
+      return res.status(400).json({
+        status: 400,
+        details: "You are not authorized to access this account!",
+      });
+    }
     if (result[0].Activation === "not activated") {
       return res.status(401).json({
         status: 401,
@@ -347,6 +354,71 @@ const loginController = async (req: Request, res: Response) => {
       user: result[0],
     });
   });
+};
+
+const loginUserWebController = (req: Request, res: Response) => {
+  const { Username, Password } = <IUser>req.body;
+
+  const query = "SELECT * FROM tbl_users where Username = (?) LIMIT 1";
+
+  const validate_login_fields = login_validator.validate({
+    Username,
+    Password,
+  });
+
+  if (validate_login_fields.error) {
+    return res.status(400).json({
+      status: 400,
+      details: validate_login_fields.error.details[0].message,
+    });
+  }
+
+  connection.query(query, [Username], async (error, result: IUser[]) => {
+    if (error) return res.status(400).json({ status: 400, error: error });
+
+    if (result.length != 1) {
+      return res.status(400).json({
+        details: "Account does not exist!",
+        status: 400,
+      });
+    }
+    const comparePassword = await compareHashPassword(
+      Password,
+      result[0].Password
+    );
+
+    if (!comparePassword) {
+      return res.status(400).json({
+        status: 400,
+        details: "Incorrect Password!",
+      });
+    }
+    const accessToken = generateToken(result[0]);
+
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: true,
+      maxAge: 60000,
+      sameSite: "none",
+    });
+
+    return res.status(200).json({
+      status: 200,
+      details: "Login succesfully!",
+      user: result[0],
+    });
+  });
+};
+
+const logoutUserWebController = (req: Request, res: Response) => {
+  res.clearCookie("accessToken", {
+    httpOnly: true,
+    secure: true,
+    maxAge: 60000,
+    sameSite: "none",
+  });
+
+  return res.status(200).json({ message: "Logout successfully!", status: 200 });
 };
 
 const logoutController = (req: Request, res: Response) => {
@@ -613,6 +685,8 @@ export {
   changePasswordController,
   forgotPasswordController,
   loginController,
+  loginUserWebController,
+  logoutUserWebController,
   registerController,
   logoutController,
   editUserController,

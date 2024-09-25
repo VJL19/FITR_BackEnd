@@ -8,7 +8,7 @@ const scan_subscription_validator = Joi.object<ISubscriptions>({
   SubscriptionType: Joi.string().required(),
   SubscriptionMethod: Joi.string().required(),
   SubscriptionUploadedImage: Joi.string().required(),
-  SubscriptionEntryDate: Joi.date().required(),
+  SubscriptionEntryDate: Joi.string().required(),
 });
 
 const fulfill_subscription_validator = Joi.object<ISubscriptions>({

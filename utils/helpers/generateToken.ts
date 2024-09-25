@@ -20,6 +20,8 @@ interface IUserPayload {
   Activation?: string;
   Password: string;
   ConfirmPassword: string;
+  RFIDNumber?: string;
+  Role?: string;
 }
 
 const generateToken = (user: IUserPayload) => {
@@ -43,6 +45,8 @@ const generateToken = (user: IUserPayload) => {
     Activation: user.Activation,
     Password: user.Password,
     ConfirmPassword: user.ConfirmPassword,
+    RFIDNumber: user.RFIDNumber,
+    Role: user.Role,
   };
   const accessToken = jwt.sign(
     user_payload,
