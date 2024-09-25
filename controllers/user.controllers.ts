@@ -410,6 +410,47 @@ const loginUserWebController = (req: Request, res: Response) => {
   });
 };
 
+const loginAsGuestController = (req: Request, res: Response) => {
+  const result: IUser[] = [
+    {
+      Role: "User",
+      Address: "Guest Address",
+      Age: 0,
+      Birthday: "Guest BirthDay",
+      Password:
+        "070c01287d7cbaa652d2bba69ec601f4fc54c7428b3251f563a475ec67b541d3c3a5dd35d51955de43c7a6f5d41b47758adc16f9003894baed04684dd2bd8bea",
+      ConfirmPassword:
+        "070c01287d7cbaa652d2bba69ec601f4fc54c7428b3251f563a475ec67b541d3c3a5dd35d51955de43c7a6f5d41b47758adc16f9003894baed04684dd2bd8bea",
+      ContactNumber: "9999999999",
+      Email: "guest@mail.com",
+      FirstName: "Guest firstname",
+      Gender: "Male",
+      Height: 180,
+      Weight: 90,
+      LastName: "Guest lastname",
+      MiddleName: "Guest middlename",
+      ProfilePic: "default_poster.png",
+      SubscriptionType: "Session",
+      UserID: 0,
+      Username: "guest123",
+    },
+  ];
+  const accessToken = generateToken(result[0]);
+
+  res.cookie("accessToken", accessToken, {
+    httpOnly: true,
+    secure: true,
+    maxAge: 60000,
+    sameSite: "none",
+  });
+
+  return res.status(200).json({
+    status: 200,
+    details: "Login as guest succesfully!",
+    user: result[0],
+  });
+};
+
 const logoutUserWebController = (req: Request, res: Response) => {
   res.clearCookie("accessToken", {
     httpOnly: true,
@@ -687,6 +728,7 @@ export {
   loginController,
   loginUserWebController,
   logoutUserWebController,
+  loginAsGuestController,
   registerController,
   logoutController,
   editUserController,

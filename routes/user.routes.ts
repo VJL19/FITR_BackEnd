@@ -10,6 +10,7 @@ import {
   upload,
   logoutUserWebController,
   loginUserWebController,
+  loginAsGuestController,
   adminRegisterUserController,
   getUsersController,
   updateUserSubscription,
@@ -36,6 +37,7 @@ user_routes.post("/activate_account", setUserActivationController);
 
 admin_routes.get("/all_users", getUsersController);
 admin_routes.post("/login_account", loginUserWebController);
+admin_routes.get("/login_as_guest", loginAsGuestController);
 admin_routes.get("/logout_account", logoutUserWebController);
 admin_routes.post("/forgot_password", forgotPasswordController);
 admin_routes.post("/change_password", changePasswordController);
