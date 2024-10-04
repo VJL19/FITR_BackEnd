@@ -92,7 +92,7 @@ const adminCreateSubscriptionController = (req: Request, res: Response) => {
     });
   }
   const query =
-    "INSERT INTO tbl_subscriptions (`UserID`, `SubscriptionAmount`, `SubscriptionBy`, `SubscriptionType`, `SubscriptionMethod`, `SubscriptionUploadedImage`, `SubscriptionStatus`, `SubscriptionEntryDate`) VALUES(NULL, ?, ?, ?, ?, 'default_poster.png', 'pending', CURRENT_TIMESTAMP());";
+    "INSERT INTO tbl_subscriptions (`UserID`, `SubscriptionAmount`, `SubscriptionBy`, `SubscriptionType`, `SubscriptionMethod`, `SubscriptionUploadedImage`, `SubscriptionStatus`, `SubscriptionEntryDate`) VALUES(NULL, ?, ?, ?, ?, 'default_poster.png', 'Fulfill', CURRENT_TIMESTAMP());";
 
   connection.query(
     query,

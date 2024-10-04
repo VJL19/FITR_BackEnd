@@ -205,7 +205,7 @@ const adminRegisterUserController = async (req: Request, res: Response) => {
     Gender,
     SubscriptionType,
     "not activated",
-    RFIDNumber,
+    null,
     "User",
   ];
   const query =
