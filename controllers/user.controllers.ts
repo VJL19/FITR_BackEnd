@@ -601,10 +601,11 @@ const forgotPasswordController = (req: Request, res: Response) => {
     const generatedCode = generateNum();
     try {
       const emailRes = await sendEmail({
+        forgotPassword: true,
         email: result[0].Email,
         code: generatedCode,
-        subject: "OTP VERIFICATION CODE",
-        emailTitle: "REQUEST FOR FORGOT PASSWORD",
+        subject: "REQUEST FOR FORGOT PASSWORD",
+        emailTitle: "OTP VERIFICATION CODE",
         emailDescription:
           "Enter the generate OTP below to complete the process of your forgot password. Note: If you do not request this code, you may disregard this email notification.",
       });
@@ -667,15 +668,17 @@ const sendEmailController = async (req: Request, res: Response) => {
     const emailRes = await sendEmail({
       email: Email,
       code: generatedCode,
-      subject: "OTP VERIFICATION CODE",
-      emailTitle: "REGISTRATION COMPLETION",
+      subject: "REGISTRATION COMPLETION",
+      emailTitle: "OTP VERIFICATION CODE",
       emailDescription:
         "Enter the generate OTP below to complete your registration in our FITR application. Note: Please don't distribute this code from anyone.",
     });
 
     return res.status(200).json({ result: emailRes, code: generatedCode });
   } catch (err) {
-    return res.status(400).json({ message: "An error is occuredd!" });
+    return res
+      .status(400)
+      .json({ message: "An error is occured!", error: err });
   }
 };
 

@@ -7,19 +7,19 @@ interface IUserPayload {
   FirstName: string;
   MiddleName: string;
   Username: string;
-  Age: number;
-  Address: string;
+  Age?: number;
+  Address?: string;
   SubscriptionType: string;
-  Birthday: string;
+  Birthday?: string;
   Email: string;
-  ContactNumber: string;
-  Height: number;
-  Weight: number;
-  ProfilePic: string;
-  Gender: string;
+  ContactNumber?: string;
+  Height?: number;
+  Weight?: number;
+  ProfilePic?: string;
+  Gender?: string;
   Activation?: string;
-  Password: string;
-  ConfirmPassword: string;
+  Password?: string;
+  ConfirmPassword?: string;
   RFIDNumber?: string;
   Role?: string;
 }
@@ -33,18 +33,8 @@ const generateToken = (user: IUserPayload) => {
     MiddleName: user.MiddleName,
     Username: user.Username,
     Email: user.Email,
-    ContactNumber: user.ContactNumber,
-    Height: user.Height,
-    Weight: user.Weight,
-    ProfilePic: user.ProfilePic,
-    Gender: user.Gender,
-    Age: user.Age,
-    Address: user.Address,
-    Birthday: user.Birthday,
     SubscriptionType: user.SubscriptionType,
     Activation: user.Activation,
-    Password: user.Password,
-    ConfirmPassword: user.ConfirmPassword,
     RFIDNumber: user.RFIDNumber,
     Role: user.Role,
   };
