@@ -16,7 +16,7 @@ const edit_post_validator = Joi.object<IPost>({
   PostImage: Joi.string().optional(),
   PostTitle: Joi.string().required(),
   PostDescription: Joi.string().required(),
-  PostDate: Joi.date().required(),
+  PostDate: Joi.string().required(),
   PostAuthor: Joi.string().required(),
   Username: Joi.string().required(),
 });

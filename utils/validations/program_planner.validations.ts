@@ -5,7 +5,7 @@ const create_program_validator = Joi.object<IProgram>({
   UserID: Joi.number().required(),
   ProgramTitle: Joi.string().required(),
   ProgramDescription: Joi.string().required(),
-  ProgramEntryDate: Joi.date().required(),
+  ProgramEntryDate: Joi.string().required(),
 });
 
 const edit_program_validator = Joi.object<IProgram>({
@@ -13,7 +13,7 @@ const edit_program_validator = Joi.object<IProgram>({
   ProgramID: Joi.number().required(),
   ProgramTitle: Joi.string().required(),
   ProgramDescription: Joi.string().required(),
-  ProgramEntryDate: Joi.date().required(),
+  ProgramEntryDate: Joi.string().required(),
 });
 
 const specific_program_validator = Joi.object<IProgram>({

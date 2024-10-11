@@ -11,7 +11,9 @@ import {
   change_password_validator,
 } from "../utils/validations/auth_validations";
 import sendEmail from "../utils/helpers/sendOTP";
-import generateToken from "../utils/helpers/generateToken";
+import generateToken, {
+  generateTokenWeb,
+} from "../utils/helpers/generateToken";
 import multer from "multer";
 import path from "path";
 import generateNum from "../utils/helpers/generateCode";
@@ -296,7 +298,7 @@ const getTotalMonthlyUserController = async (req: Request, res: Response) => {
 const loginController = async (req: Request, res: Response) => {
   const { Username, Password } = <IUser>req.body;
 
-  const query = `SELECT * FROM tbl_users where Username = (?) LIMIT 1`;
+  const query = `SELECT * FROM tbl_users where Username = (?) AND Role != 'Admin' LIMIT 1`;
 
   const validate_login_fields = login_validator.validate({
     Username,
@@ -393,7 +395,7 @@ const loginUserWebController = (req: Request, res: Response) => {
         details: "Incorrect Password!",
       });
     }
-    const accessToken = generateToken(result[0]);
+    const accessToken = generateTokenWeb(result[0]);
 
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
@@ -562,6 +564,10 @@ const editUserController = async (req: Request, res: Response) => {
         Password: Password,
         ConfirmPassword: ConfirmPassword,
       });
+
+      for (var i in clients) {
+        clients[i].emit("refresh_user");
+      }
 
       return res.status(200).json({
         message: "Change account! successfully!",

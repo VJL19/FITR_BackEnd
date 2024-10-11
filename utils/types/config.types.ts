@@ -9,6 +9,7 @@ interface IConfig {
   host: string | undefined;
   user: string | undefined;
   ACCESS_TOKEN_SECRET: string | undefined;
+  ACCESS_TOKEN_SECRET_WEB: string | undefined;
 }
 
 export default function loadConfig(): IConfig {
@@ -19,5 +20,6 @@ export default function loadConfig(): IConfig {
     user: process.env.user,
     password: process.env.password,
     ACCESS_TOKEN_SECRET: process.env.ACCESS_TOKEN_SECRET,
+    ACCESS_TOKEN_SECRET_WEB: process.env.ACCESS_TOKEN_SECRET_WEB,
   };
 }
