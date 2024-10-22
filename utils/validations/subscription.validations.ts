@@ -6,8 +6,8 @@ const scan_subscription_validator = Joi.object<ISubscriptions>({
   SubscriptionAmount: Joi.number().required(),
   SubscriptionBy: Joi.string().required(),
   SubscriptionType: Joi.string().required(),
+  SubscriptionStatus: Joi.string().required(),
   SubscriptionMethod: Joi.string().required(),
-  SubscriptionUploadedImage: Joi.string().required(),
   SubscriptionEntryDate: Joi.string().required(),
 });
 

@@ -8,9 +8,9 @@ const verifyAuthToken = (req: Request, res: Response, next: NextFunction) => {
 
   const config = loadConfig();
   if (!accessToken) {
-    return res.status(400).json({
+    return res.status(401).json({
       message: "You are not authenticated! Please login again!",
-      status: 400,
+      status: 401,
       isAuthenticated: false,
     });
   }
@@ -22,9 +22,12 @@ const verifyAuthToken = (req: Request, res: Response, next: NextFunction) => {
       decoded: string | jwt.JwtPayload | undefined
     ) => {
       if (error)
-        return res
-          .status(400)
-          .json({ error: error, status: 400, isAuthenticated: false });
+        return res.status(400).json({
+          error: error,
+          status: 400,
+          isAuthenticated: false,
+          message: "Your JWT Token is expired!, Please login again",
+        });
 
       res.locals.payload = decoded;
       res.locals.isAuthenticated = true;

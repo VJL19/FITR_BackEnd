@@ -20,77 +20,95 @@ import {
   getDailySessionGrowthRateController,
   getDailyMonthlyGrowthRateController,
 } from "../controllers/sales_analytics.controllers";
+import verifyWebAuthToken from "../middlewares/verifyTokenWeb";
 
 const sales_analytics_routes = express.Router();
 
 sales_analytics_routes.get(
   "/today_sessionUsers/sales",
+  verifyWebAuthToken,
   getTodaySessionUserSalesController
 );
 sales_analytics_routes.get(
   "/today_monthlyUsers/sales",
+  verifyWebAuthToken,
   getTodayMonthlyUserSalesController
 );
 sales_analytics_routes.get(
   "/daily_sessionUsers/sales",
+  verifyWebAuthToken,
   getDailySessionUserSalesController
 );
 sales_analytics_routes.get(
   "/daily_monthlyUsers/sales",
+  verifyWebAuthToken,
   getDailyMonthlyUserSalesController
 );
 sales_analytics_routes.get(
   "/daily_sessionUsers/growth_rate",
+  verifyWebAuthToken,
   getDailySessionGrowthRateController
 );
 sales_analytics_routes.get(
   "/daily_monthlyUsers/growth_rate",
+  verifyWebAuthToken,
   getDailyMonthlyGrowthRateController
 );
 sales_analytics_routes.get(
   "/weekly_sessionUsers/sales/:selectedMonth",
+  verifyWebAuthToken,
   getWeeklySessionUserSalesController
 );
 sales_analytics_routes.get(
   "/weekly_monthlyUsers/sales/:selectedMonth",
+  verifyWebAuthToken,
   getWeeklyMonthlyUserSalesController
 );
 
 sales_analytics_routes.get(
   "/weekly_sessionUsers/growth_rate/:selectedMonth",
+  verifyWebAuthToken,
   getWeeklySessionUserGrowthRateController
 );
 sales_analytics_routes.get(
   "/weekly_monthlyUsers/growth_rate/:selectedMonth",
+  verifyWebAuthToken,
   getWeeklyMonthlyUserGrowthRateController
 );
 sales_analytics_routes.get(
   "/monthly_sessionUsers/growth_rate/:selectedYear",
+  verifyWebAuthToken,
   getMonthlySessionUserGrowthRateController
 );
 sales_analytics_routes.get(
   "/monthly_mUsers/growth_rate/:selectedYear",
+  verifyWebAuthToken,
   getMonthlyMUserGrowthRateController
 );
 sales_analytics_routes.get(
   "/monthly_sessionUsers/sales/:selectedYear",
+  verifyWebAuthToken,
   getMonthlySessionUserSalesController
 );
 sales_analytics_routes.get(
   "/monthly_mUsers/sales/:selectedYear",
+  verifyWebAuthToken,
   getMonthlyMUserSalesController
 );
 
 sales_analytics_routes.get(
   "/weekly/sales:AnalyticsEntryDate",
+  verifyWebAuthToken,
   getWeeklySalesController
 );
 sales_analytics_routes.get(
   "/monthly/sales:AnalyticsEntryDate",
+  verifyWebAuthToken,
   getMonthlySalesController
 );
 sales_analytics_routes.get(
   "/yearly/sales:AnalyticsEntryDate",
+  verifyWebAuthToken,
   getYearlySalesController
 );
 sales_analytics_routes.post(
@@ -99,6 +117,7 @@ sales_analytics_routes.post(
 );
 sales_analytics_routes.post(
   "/insert_subscription/sales_without_phone",
+  verifyWebAuthToken,
   insertSubscriptionWithoutMController
 );
 

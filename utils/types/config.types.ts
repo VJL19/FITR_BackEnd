@@ -10,6 +10,7 @@ interface IConfig {
   user: string | undefined;
   ACCESS_TOKEN_SECRET: string | undefined;
   ACCESS_TOKEN_SECRET_WEB: string | undefined;
+  port: number | undefined;
 }
 
 export default function loadConfig(): IConfig {
@@ -21,5 +22,6 @@ export default function loadConfig(): IConfig {
     password: process.env.password,
     ACCESS_TOKEN_SECRET: process.env.ACCESS_TOKEN_SECRET,
     ACCESS_TOKEN_SECRET_WEB: process.env.ACCESS_TOKEN_SECRET_WEB,
+    port: Number(process.env.MYSQL_PORT),
   };
 }

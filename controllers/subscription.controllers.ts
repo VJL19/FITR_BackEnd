@@ -18,8 +18,8 @@ const createSubscriptionController = (req: Request, res: Response) => {
     SubscriptionAmount,
     SubscriptionBy,
     SubscriptionType,
+    SubscriptionStatus,
     SubscriptionMethod,
-    SubscriptionUploadedImage,
     SubscriptionEntryDate,
   } = <ISubscriptions>req.body;
 
@@ -28,8 +28,8 @@ const createSubscriptionController = (req: Request, res: Response) => {
     SubscriptionAmount,
     SubscriptionBy,
     SubscriptionType,
+    SubscriptionStatus,
     SubscriptionMethod,
-    SubscriptionUploadedImage,
     SubscriptionEntryDate,
   });
 
@@ -41,7 +41,7 @@ const createSubscriptionController = (req: Request, res: Response) => {
   }
 
   const query =
-    "INSERT INTO tbl_subscriptions (`UserID`, `SubscriptionAmount`, `SubscriptionBy`, `SubscriptionType`, `SubscriptionMethod`, `SubscriptionUploadedImage`, `SubscriptionStatus`, `SubscriptionEntryDate`) VALUES (?, ?, ?, ?, ?, ?, 'pending', ?) LIMIT 1;";
+    "INSERT INTO tbl_subscriptions (`UserID`, `SubscriptionAmount`, `SubscriptionBy`, `SubscriptionType`, `SubscriptionMethod`, `SubscriptionStatus`, `SubscriptionEntryDate`) VALUES (?, ?, ?, ?, ?, ?, ?) LIMIT 1;";
 
   connection.query(
     query,
@@ -51,7 +51,7 @@ const createSubscriptionController = (req: Request, res: Response) => {
       SubscriptionBy,
       SubscriptionType,
       SubscriptionMethod,
-      SubscriptionUploadedImage,
+      SubscriptionStatus,
       SubscriptionEntryDate,
     ],
     (error, result) => {
@@ -150,7 +150,7 @@ const getAllSubscriptionsByDateController = (req: Request, res: Response) => {
   const selectedDate = req.params.selectedDate.split(":")[1];
 
   const query =
-    "SELECT s.UserID,  s.SubscriptionID, u.LastName, u.FirstName, u.MiddleName, s.SubscriptionAmount, s.SubscriptionType, s.SubscriptionUploadedImage, s.SubscriptionStatus, s.SubscriptionEntryDate FROM tbl_subscriptions s LEFT JOIN tbl_users u ON s.UserID = u.UserID WHERE DATE(s.SubscriptionEntryDate) = DATE(?) AND s.SubscriptionStatus = 'Fulfill';";
+    "SELECT s.UserID,  s.SubscriptionID, u.LastName, u.FirstName, u.MiddleName, s.SubscriptionAmount, s.SubscriptionType, s.SubscriptionStatus, s.SubscriptionEntryDate FROM tbl_subscriptions s LEFT JOIN tbl_users u ON s.UserID = u.UserID WHERE DATE(s.SubscriptionEntryDate) = DATE(?) AND s.SubscriptionStatus = 'Fulfill';";
 
   connection.query(query, [selectedDate], (error, result) => {
     if (error) return res.status(400).json({ error: error, status: 400 });
@@ -303,7 +303,7 @@ const getAllSubscriptionsAdminController = (req: Request, res: Response) => {
 
 const getAllSubscriptionsUserController = (req: Request, res: Response) => {
   const query =
-    "SELECT s.UserID, s.SubscriptionID, u.ProfilePic, s.SubscriptionBy, s.SubscriptionAmount, s.SubscriptionType, s.SubscriptionMethod, s.SubscriptionUploadedImage, s.SubscriptionStatus, s.SubscriptionEntryDate FROM tbl_subscriptions s LEFT JOIN tbl_users u ON s.UserID = u.UserID ORDER BY s.SubscriptionEntryDate DESC;";
+    "SELECT s.UserID, s.SubscriptionID, u.ProfilePic, s.SubscriptionBy, s.SubscriptionAmount, s.SubscriptionType, s.SubscriptionMethod, s.SubscriptionStatus, s.SubscriptionEntryDate FROM tbl_subscriptions s LEFT JOIN tbl_users u ON s.UserID = u.UserID ORDER BY s.SubscriptionEntryDate DESC;";
 
   connection.query(query, (error, result) => {
     if (error) return res.status(400).json({ error: error, status: 400 });
@@ -373,7 +373,7 @@ const getSubscriptionHistoryByDateController = (
 
 const getAllRecentSubscriptionsController = (req: Request, res: Response) => {
   const query =
-    "SELECT s.UserID,  s.SubscriptionID, u.ProfilePic, u.LastName, u.FirstName, u.MiddleName, s.SubscriptionBy, s.SubscriptionAmount, s.SubscriptionType, s.SubscriptionUploadedImage, s.SubscriptionStatus, s.SubscriptionEntryDate FROM tbl_subscriptions s LEFT JOIN tbl_users u ON s.UserID = u.UserID ORDER BY s.SubscriptionEntryDate DESC LIMIT 5;";
+    "SELECT s.UserID,  s.SubscriptionID, u.ProfilePic, u.LastName, u.FirstName, u.MiddleName, s.SubscriptionBy, s.SubscriptionAmount, s.SubscriptionType, s.SubscriptionStatus, s.SubscriptionEntryDate FROM tbl_subscriptions s LEFT JOIN tbl_users u ON s.UserID = u.UserID ORDER BY s.SubscriptionEntryDate DESC LIMIT 5;";
   connection.query(query, (error, result) => {
     if (error) return res.status(400).json({ error: error, status: 400 });
 

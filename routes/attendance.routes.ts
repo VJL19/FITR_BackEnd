@@ -16,6 +16,7 @@ import {
   getUserRFIDNumber,
 } from "../controllers/attendance.controllers";
 import verifyAuthToken from "../middlewares/verifyToken";
+import verifyWebAuthToken from "../middlewares/verifyTokenWeb";
 
 const attendance_routes = express.Router();
 
@@ -39,16 +40,49 @@ attendance_routes_admin.get(
   verifyAuthToken,
   generateSecretCodeController
 );
-attendance_routes_admin.get("/checkUserTapRFID/:UserID", checkUserTapRFID);
-attendance_routes_admin.post("/record_user", tapRFIDCardController);
-attendance_routes_admin.get("/checkUserRFID/:RFIDNumber", checkUserRFIDExist);
-attendance_routes_admin.get("/users_attendance", getAllUserAttendance);
-attendance_routes_admin.get("/all_recent_attendance", getAllRecentAttendance);
-attendance_routes_admin.post("/create_record", createUserRecordController);
-attendance_routes_admin.post("/update_isPaid", updateIsPaidRecordsController);
-attendance_routes_admin.post("/update_record", editUserRecordController);
+attendance_routes_admin.get(
+  "/checkUserTapRFID/:UserID",
+  verifyWebAuthToken,
+  checkUserTapRFID
+);
+attendance_routes_admin.post(
+  "/record_user",
+  verifyWebAuthToken,
+  tapRFIDCardController
+);
+attendance_routes_admin.get(
+  "/checkUserRFID/:RFIDNumber",
+  verifyWebAuthToken,
+  checkUserRFIDExist
+);
+attendance_routes_admin.get(
+  "/users_attendance",
+  verifyWebAuthToken,
+  getAllUserAttendance
+);
+attendance_routes_admin.get(
+  "/all_recent_attendance",
+  verifyWebAuthToken,
+  getAllRecentAttendance
+);
+attendance_routes_admin.post(
+  "/create_record",
+  verifyWebAuthToken,
+  createUserRecordController
+);
+attendance_routes_admin.post(
+  "/update_isPaid",
+  verifyWebAuthToken,
+  updateIsPaidRecordsController
+);
+attendance_routes_admin.post(
+  "/update_record",
+  verifyWebAuthToken,
+  editUserRecordController
+);
 attendance_routes_admin.delete(
   "/delete_record:AttendanceID",
+  verifyWebAuthToken,
   deleteUserRecordController
 );
 

@@ -19,5 +19,6 @@ interface IUser {
   RFIDNumber?: string;
   Activation?: string;
   Role?: string;
+  GuestLogin?: boolean;
 }
 export default IUser;

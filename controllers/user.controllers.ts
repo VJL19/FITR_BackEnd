@@ -396,11 +396,14 @@ const loginUserWebController = (req: Request, res: Response) => {
       });
     }
     const accessToken = generateTokenWeb(result[0]);
-
+    //set expiry for the cookie.
+    let date = new Date();
+    let minutes = 30;
+    date.setTime(date.getTime() + minutes * 60 * 1000);
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
       secure: true,
-      maxAge: 60000,
+      expires: date,
       sameSite: "none",
     });
 
@@ -429,6 +432,7 @@ const loginAsGuestController = (req: Request, res: Response) => {
       Gender: "Male",
       Height: 180,
       Weight: 90,
+      GuestLogin: true,
       LastName: "Guest lastname",
       MiddleName: "Guest middlename",
       ProfilePic: "default_poster.png",
@@ -437,7 +441,7 @@ const loginAsGuestController = (req: Request, res: Response) => {
       Username: "guest123",
     },
   ];
-  const accessToken = generateToken(result[0]);
+  const accessToken = generateTokenWeb(result[0]);
 
   res.cookie("accessToken", accessToken, {
     httpOnly: true,

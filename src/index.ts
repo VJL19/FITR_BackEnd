@@ -24,6 +24,8 @@ import {
   user_subscription_routes,
   admin_subscription_routes,
   sales_analytics_routes,
+  user_announcemnt_routes,
+  program_suggested_user_routes,
   generate_reports_routes,
   admin_routes,
   records_routes,
@@ -81,8 +83,10 @@ app.get("/api/v1/user/sample_health", (req: Request, res: Response) => {
 //register generate qr code routes
 app.use("/api/v1/admin/attendance/", attendance_routes_admin);
 
-//register announcement routes
+//registe admin announcement routes
 app.use("/api/v1/admin/announcement/", announcements_routes);
+//register user announcement routes
+app.use("/api/v1/user/announcement/", user_announcemnt_routes);
 
 //register transaction/subscription for admin routes.
 app.use("/api/v1/admin/subscription", admin_subscription_routes);
@@ -134,6 +138,7 @@ app.use("/api/v1/user/notifications/", notification_routes);
 
 //register program_planner routes.
 app.use("/api/v1/user/program/", program_planner_routes);
+app.use("/api/v1/user/program/", program_suggested_user_routes);
 
 //register home/main dashboard routes.
 app.use("/api/v1/user/home/", home_routes);

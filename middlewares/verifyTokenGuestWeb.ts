@@ -30,7 +30,7 @@ type TMyAuthToken = {
   };
 };
 
-const verifyWebAuthToken = (
+const verifyTokenGuestWeb = (
   req: Request,
   res: Response,
   next: NextFunction
@@ -39,9 +39,9 @@ const verifyWebAuthToken = (
 
   const config = loadConfig();
   if (!accessToken) {
-    return res.status(401).json({
+    return res.status(400).json({
       message: "You are not authenticated in web! Please login again!",
-      status: 401,
+      status: 400,
       isAuthenticated: false,
     });
   }
@@ -59,12 +59,6 @@ const verifyWebAuthToken = (
           .json({ error: error, status: 400, isAuthenticated: false });
 
       const decodedToken = <IUser>decoded;
-      if (decodedToken?.Role !== "Admin" && !decodedToken?.GuestLogin) {
-        return res.status(403).json({
-          message: "You are not authorized to view this page!",
-          status: 403,
-        });
-      }
 
       res.locals.payload = decoded;
       res.locals.isAuthenticated = true;
@@ -74,4 +68,4 @@ const verifyWebAuthToken = (
   );
 };
 
-export default verifyWebAuthToken;
+export default verifyTokenGuestWeb;

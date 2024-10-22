@@ -1,4 +1,5 @@
 import announcements_routes from "./announcement.routes";
+import { user_announcemnt_routes } from "./announcement.routes";
 import post_routes from "./post.routes";
 import newsfeed_routes from "./newsfeed.routes";
 import user_routes from "./user.routes";
@@ -8,6 +9,7 @@ import gym_equipment_routes from "./gym_equipments.routes";
 import notification_routes from "./notification.routes";
 import program_planner_routes from "./program_planner.routes";
 import program_suggested_routes from "./program_suggested.routes";
+import { program_suggested_user_routes } from "./program_suggested.routes";
 import sales_analytics_routes from "./sales_analytics.routes";
 import home_routes from "./home.routes";
 import {
@@ -47,4 +49,6 @@ export {
   generate_reports_routes,
   admin_routes,
   records_routes,
+  user_announcemnt_routes,
+  program_suggested_user_routes,
 };

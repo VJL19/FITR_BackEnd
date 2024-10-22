@@ -22,6 +22,7 @@ interface IUserPayload {
   ConfirmPassword?: string;
   RFIDNumber?: string;
   Role?: string;
+  GuestLogin?: boolean;
 }
 
 const generateToken = (user: IUserPayload) => {
@@ -65,6 +66,7 @@ export const generateTokenWeb = (user: IUserPayload) => {
     MiddleName: user.MiddleName,
     Username: user.Username,
     Email: user.Email,
+    GuestLogin: user.GuestLogin,
     SubscriptionType: user.SubscriptionType,
     Activation: user.Activation,
     RFIDNumber: user.RFIDNumber,

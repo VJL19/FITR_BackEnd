@@ -10,13 +10,26 @@ import {
   removeNotificationComment,
   removeUserNotifications,
 } from "../controllers/notification.controllers";
+import verifyAuthToken from "../middlewares/verifyToken";
 
 const notification_routes = express.Router();
 
-notification_routes.post("/readNotifications", markAsReadNotification);
-notification_routes.post("/unreadNotifications", markAsUnreadNotification);
+notification_routes.post(
+  "/readNotifications",
+  verifyAuthToken,
+  markAsReadNotification
+);
+notification_routes.post(
+  "/unreadNotifications",
+  verifyAuthToken,
+  markAsUnreadNotification
+);
 
-notification_routes.get("/getNotifications/:UserID", getNotifications);
+notification_routes.get(
+  "/getNotifications/:UserID",
+  verifyAuthToken,
+  getNotifications
+);
 notification_routes.get(
   "/getNotificationsCount/:UserID",
   getNotificationsCount
