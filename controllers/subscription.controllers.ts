@@ -92,7 +92,7 @@ const adminCreateSubscriptionController = (req: Request, res: Response) => {
     });
   }
   const query =
-    "INSERT INTO tbl_subscriptions (`UserID`, `SubscriptionAmount`, `SubscriptionBy`, `SubscriptionType`, `SubscriptionMethod`, `SubscriptionUploadedImage`, `SubscriptionStatus`, `SubscriptionEntryDate`) VALUES(NULL, ?, ?, ?, ?, 'default_poster.png', 'Fulfill', CURRENT_TIMESTAMP());";
+    "INSERT INTO tbl_subscriptions (`UserID`, `SubscriptionAmount`, `SubscriptionBy`, `SubscriptionType`, `SubscriptionMethod`, `SubscriptionStatus`, `SubscriptionEntryDate`) VALUES(NULL, ?, ?, ?, ?, 'Fulfill', CURRENT_TIMESTAMP());";
 
   connection.query(
     query,
@@ -303,7 +303,7 @@ const getAllSubscriptionsAdminController = (req: Request, res: Response) => {
 
 const getAllSubscriptionsUserController = (req: Request, res: Response) => {
   const query =
-    "SELECT s.UserID, s.SubscriptionID, u.ProfilePic, s.SubscriptionBy, s.SubscriptionAmount, s.SubscriptionType, s.SubscriptionMethod, s.SubscriptionStatus, s.SubscriptionEntryDate FROM tbl_subscriptions s LEFT JOIN tbl_users u ON s.UserID = u.UserID ORDER BY s.SubscriptionEntryDate DESC;";
+    "SELECT s.UserID, s.SubscriptionID, u.Email, u.ContactNumber, u.ProfilePic, s.SubscriptionBy, s.SubscriptionAmount, s.SubscriptionType, s.SubscriptionMethod, s.SubscriptionStatus, s.SubscriptionEntryDate FROM tbl_subscriptions s LEFT JOIN tbl_users u ON s.UserID = u.UserID ORDER BY s.SubscriptionEntryDate DESC;";
 
   connection.query(query, (error, result) => {
     if (error) return res.status(400).json({ error: error, status: 400 });

@@ -7,6 +7,8 @@ import {
   notify_action_validator,
   get_action_validator,
 } from "../utils/validations/notifications_validations";
+import { Expo } from "expo-server-sdk";
+import { sendPushNotification } from "../utils/helpers/ExpoSdk";
 
 const markAsReadNotification = (req: Request, res: Response) => {
   const { UserID, NotificationID } = <INotifications>req.body;
@@ -243,9 +245,25 @@ const removeUserNotifications = (req: Request, res: Response) => {
   });
 };
 
+const expoSendNotification = async (req: Request, res: Response) => {
+  const { expoPushToken } = req.body;
+
+  console.log("hey in expo send", expoPushToken);
+  if (Expo.isExpoPushToken(expoPushToken))
+    await sendPushNotification(
+      expoPushToken,
+      "This is sent from back-end express :)"
+    );
+
+  return res
+    .status(200)
+    .json({ message: "Successfully sent the notification!", status: 200 });
+};
+
 export {
   markAsReadNotification,
   markAsUnreadNotification,
+  expoSendNotification,
   getNotifications,
   notify_user_like,
   notify_user_comment,

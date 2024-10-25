@@ -29,6 +29,7 @@ import {
   generate_reports_routes,
   admin_routes,
   records_routes,
+  attendance_analytics,
 } from "../routes/index.routes";
 import cookieParser from "cookie-parser";
 //initialize the top of the function express.
@@ -96,6 +97,9 @@ app.use("/api/v1/admin/program/", program_suggested_routes);
 
 //register sales_analytics routes.
 app.use("/api/v1/admin/sales_analytics/", sales_analytics_routes);
+
+//register attendance_analytics routes.
+app.use("/api/v1/admin/attendance_analytics/", attendance_analytics);
 
 //register generate_reports rotues.
 app.use("/api/v1/admin/generate_report/", generate_reports_routes);

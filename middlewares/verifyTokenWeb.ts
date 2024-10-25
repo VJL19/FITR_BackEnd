@@ -59,7 +59,14 @@ const verifyWebAuthToken = (
           .json({ error: error, status: 400, isAuthenticated: false });
 
       const decodedToken = <IUser>decoded;
-      if (decodedToken?.Role !== "Admin" && !decodedToken?.GuestLogin) {
+      if (decodedToken?.Role !== "Admin" && decodedToken?.GuestLogin) {
+        return res.status(403).json({
+          message: "You are not authorized to view this page!",
+          status: 403,
+        });
+      }
+
+      if (decodedToken?.Role === "User") {
         return res.status(403).json({
           message: "You are not authorized to view this page!",
           status: 403,

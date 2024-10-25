@@ -21,8 +21,8 @@ newsfeed_routes.post(
   verifyAuthToken,
   createPostsFromFeedController
 );
-newsfeed_routes.post(
-  "/all_comments",
+newsfeed_routes.get(
+  "/all_comments/:NewsfeedID",
   verifyAuthToken,
   getAllCommentPostsController
 );

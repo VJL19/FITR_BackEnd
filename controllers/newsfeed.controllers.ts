@@ -254,7 +254,8 @@ const commentPostController = (req: Request, res: Response) => {
 };
 
 const getAllCommentPostsController = (req: Request, res: Response) => {
-  const { NewsfeedID } = <INewsFeed>req.body;
+  const NewsfeedID = req.params.NewsfeedID.split(":")[1];
+  
   const query =
     "SELECT c.UserID, c.NewsfeedID, c.CommentID, c.CommentText, c.CommentDate, u.Username, u.ProfilePic FROM tbl_comments c LEFT JOIN tbl_users u ON c.UserID = u.UserID WHERE c.NewsfeedID = ? ORDER BY c.CommentDate DESC;";
 

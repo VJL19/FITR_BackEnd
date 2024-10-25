@@ -8,6 +8,7 @@ import {
   changePasswordController,
   sendEmailController,
   upload,
+  addExpoTokenUserController,
   logoutUserWebController,
   loginUserWebController,
   loginAsGuestController,
@@ -20,9 +21,9 @@ import {
   getTotalSessionUserController,
   getTotalMonthlyUserController,
 } from "../controllers/user.controllers";
-import verifyAuthToken from "../middlewares/verifyToken";
 import verifyWebAuthToken from "../middlewares/verifyTokenWeb";
-import verifyTokenGuestWeb from "../middlewares/verifyTokenGuestWeb";
+import verifyAuthToken from "../middlewares/verifyToken";
+import verifyAuthWeb from "../middlewares/verifyAuthWeb";
 
 const user_routes = express.Router();
 export const admin_routes = express.Router();
@@ -30,6 +31,7 @@ export const admin_routes = express.Router();
 user_routes.post("/register_account", registerController);
 user_routes.post("/login_account", loginController);
 user_routes.get("/logout_account", logoutController);
+user_routes.post("/add_token", addExpoTokenUserController);
 user_routes.post("/edit_account", verifyAuthToken, editUserController);
 user_routes.post("/forgot_password", forgotPasswordController);
 user_routes.post("/change_password", changePasswordController);
@@ -85,9 +87,9 @@ admin_routes.get("/dashboard", verifyWebAuthToken, (req, res) => {
     accessToken: res.locals.accessToken,
   });
 });
-admin_routes.get("/guest_dashboard", verifyTokenGuestWeb, (req, res) => {
+admin_routes.get("/auth_dashboard", verifyAuthWeb, (req, res) => {
   return res.json({
-    message: "Welcome to guest dashboard web!",
+    message: "You are authenticated in dashboard web!",
     user: res.locals.payload,
     isAuthenticated: res.locals.isAuthenticated,
     accessToken: res.locals.accessToken,

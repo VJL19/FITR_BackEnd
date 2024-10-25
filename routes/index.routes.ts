@@ -27,10 +27,12 @@ import {
 import generate_reports_routes from "./generate_reports.routes";
 import { admin_routes } from "./user.routes";
 import records_routes from "./records.routes";
+import attendance_analytics from "./attendance_analytics.routes";
 export {
   workout_favorite_routes,
   exercise_favorite_routes,
   attendance_routes_admin,
+  attendance_analytics,
   announcements_routes,
   attendance_routes,
   post_routes,

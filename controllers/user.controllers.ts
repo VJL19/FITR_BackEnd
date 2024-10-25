@@ -103,40 +103,21 @@ const registerController = async (
     Gender,
     SubscriptionType,
     "not activated",
+    null,
+    "User",
+    null,
   ];
   const query =
-    "INSERT INTO tbl_users (`LastName`, `FirstName`, `MiddleName`, `Age`, `Birthday`, `ContactNumber`, `Address`, `Email`, `Height`, `Weight`, `Username`, `Password`, `ConfirmPassword`, `ProfilePic`, `Gender`, `SubscriptionType`, `Activation`, `RFIDNumber`, `Role`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, 'User')";
+    "INSERT INTO tbl_users (`LastName`, `FirstName`, `MiddleName`, `Age`, `Birthday`, `ContactNumber`, `Address`, `Email`, `Height`, `Weight`, `Username`, `Password`, `ConfirmPassword`, `ProfilePic`, `Gender`, `SubscriptionType`, `Activation`, `RFIDNumber`, `Role`, `ExpoNotifToken`) VALUES (?)";
 
-  connection.query(
-    query,
-    [
-      LastName,
-      FirstName,
-      MiddleName,
-      Age,
-      Birthday,
-      ContactNumber,
-      Address,
-      Email,
-      Height,
-      Weight,
-      Username,
-      encryptedPass,
-      encryptedConfirmpass,
-      ProfilePic,
-      Gender,
-      SubscriptionType,
-      "not activated",
-    ],
-    (error, result: IUser[]) => {
-      if (error)
-        return res
-          .status(400)
-          .json({ message: error.sqlMessage, status: 400, error: error });
-      // next();
-      return res.json({ message: "Successfully register!", status: 200 });
-    }
-  );
+  connection.query(query, [values], (error, result: IUser[]) => {
+    if (error)
+      return res
+        .status(400)
+        .json({ message: error.sqlMessage, status: 400, error: error });
+    // next();
+    return res.json({ message: "Successfully register!", status: 200 });
+  });
 };
 
 const adminRegisterUserController = async (req: Request, res: Response) => {
@@ -209,9 +190,10 @@ const adminRegisterUserController = async (req: Request, res: Response) => {
     "not activated",
     null,
     "User",
+    null,
   ];
   const query =
-    "INSERT INTO tbl_users (`LastName`, `FirstName`, `MiddleName`, `Age`, `Birthday`, `ContactNumber`, `Address`, `Email`, `Height`, `Weight`, `Username`, `Password`, `ConfirmPassword`, `ProfilePic`, `Gender`, `SubscriptionType`, `Activation`, `RFIDNumber`, `Role`) VALUES (?)";
+    "INSERT INTO tbl_users (`LastName`, `FirstName`, `MiddleName`, `Age`, `Birthday`, `ContactNumber`, `Address`, `Email`, `Height`, `Weight`, `Username`, `Password`, `ConfirmPassword`, `ProfilePic`, `Gender`, `SubscriptionType`, `Activation`, `RFIDNumber`, `Role`, `ExpoNotifToken`) VALUES (?)";
 
   connection.query(query, [values], (error, result: IUser[]) => {
     if (error)
@@ -224,30 +206,46 @@ const adminRegisterUserController = async (req: Request, res: Response) => {
 const updateUserSubscription = async (req: Request, res: Response) => {
   const { UserID, SubscriptionType, RFIDNumber } = <IUser>req.body;
 
-  const query =
-    "UPDATE tbl_users SET `SubscriptionType` = ?, `RFIDNumber` = ? WHERE `UserID` = ? LIMIT 1;SELECT * FROM tbl_users where UserID = (?) LIMIT 1;";
+  const queryExpiration =
+    "SELECT * FROM tbl_attendance WHERE `UserID` = ? AND Date(SubscriptionExpectedEnd) > NOW()";
 
-  connection.query(
-    query,
-    [SubscriptionType, RFIDNumber, UserID, UserID],
-    (error, result) => {
-      if (error)
-        return res
-          .status(400)
-          .json({ error: error, message: error.sqlMessage });
+  connection.query(queryExpiration, [UserID], (error, result) => {
+    if (error)
+      return res.status(400).json({ error: error, message: error.sqlMessage });
 
-      const refreshToken = generateToken(result[1][0]);
-
-      for (var i in clients) {
-        clients[i].emit("refresh_user", { refresh_token: refreshToken });
-      }
-      return res.status(200).json({
-        message: "Successfully update the subscription type!",
-        status: 200,
-        accessToken: refreshToken,
+    if (result.length > 0) {
+      return res.status(402).json({
+        message:
+          "This user has currently active monthly subscription. Action cannot be done",
+        status: 402,
       });
     }
-  );
+
+    const query =
+      "UPDATE tbl_users SET `SubscriptionType` = ?, `RFIDNumber` = ? WHERE `UserID` = ? LIMIT 1;SELECT * FROM tbl_users where UserID = (?) LIMIT 1;";
+
+    connection.query(
+      query,
+      [SubscriptionType, RFIDNumber, UserID, UserID],
+      (error, result) => {
+        if (error)
+          return res
+            .status(400)
+            .json({ error: error, message: error.sqlMessage });
+
+        const refreshToken = generateToken(result[1][0]);
+
+        for (var i in clients) {
+          clients[i].emit("refresh_user", { refresh_token: refreshToken });
+        }
+        return res.status(200).json({
+          message: "Successfully update the subscription type!",
+          status: 200,
+          accessToken: refreshToken,
+        });
+      }
+    );
+  });
 };
 
 const getTotalUserController = async (req: Request, res: Response) => {
@@ -709,14 +707,15 @@ const getUsersController = (req: Request, res: Response) => {
 const setUserActivationController = (req: Request, res: Response) => {
   const { Email } = <IUser>req.body;
   const query =
-    "UPDATE tbl_users SET `Activation` = 'activated' WHERE `Email` = ? LIMIT 1;";
-  connection.query(query, [Email], (error, result) => {
+    "UPDATE tbl_users SET `Activation` = 'activated' WHERE `Email` = ? LIMIT 1;SELECT * FROM tbl_users WHERE `Email` = ? LIMIT 1;";
+  connection.query(query, [Email, Email], (error, result: IUser[]) => {
     if (error)
       return res.status(400).json({ error: error, message: error.sqlMessage });
 
     return res.status(200).json({
       message: "Successfully activated this account!",
       result: result,
+      email: result[1]?.Email,
     });
   });
 };
@@ -735,9 +734,30 @@ const deleteUserController = (req: Request, res: Response) => {
   });
 };
 
+const addExpoTokenUserController = (req: Request, res: Response) => {
+  const { ExpoNotifToken, Email } = req.body;
+
+  const query =
+    "UPDATE tbl_users SET `ExpoNotifToken` = ? WHERE `Email` = ? LIMIT 1;";
+
+  connection.query(query, [ExpoNotifToken, Email], (error, result) => {
+    if (error)
+      return res
+        .status(400)
+        .json({ error: error, message: error.sqlMessage, status: 400 });
+
+    return res.status(200).json({
+      message: "Successfully inserted an expo notif token from this user!",
+      status: 200,
+      result: result,
+    });
+  });
+};
+
 export {
   changePasswordController,
   forgotPasswordController,
+  addExpoTokenUserController,
   loginController,
   loginUserWebController,
   logoutUserWebController,

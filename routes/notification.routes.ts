@@ -9,6 +9,7 @@ import {
   removeNotificationLike,
   removeNotificationComment,
   removeUserNotifications,
+  expoSendNotification,
 } from "../controllers/notification.controllers";
 import verifyAuthToken from "../middlewares/verifyToken";
 
@@ -19,6 +20,7 @@ notification_routes.post(
   verifyAuthToken,
   markAsReadNotification
 );
+notification_routes.post("/expo-test-notif", expoSendNotification);
 notification_routes.post(
   "/unreadNotifications",
   verifyAuthToken,
@@ -34,8 +36,12 @@ notification_routes.get(
   "/getNotificationsCount/:UserID",
   getNotificationsCount
 );
-notification_routes.post("/notify_like", notify_user_like);
-notification_routes.post("/notify_comment", notify_user_comment);
+notification_routes.post("/notify_like", verifyAuthToken, notify_user_like);
+notification_routes.post(
+  "/notify_comment",
+  verifyAuthToken,
+  notify_user_comment
+);
 notification_routes.post("/remove_notification", removeNotificationLike);
 notification_routes.post(
   "/remove_notification_comment",

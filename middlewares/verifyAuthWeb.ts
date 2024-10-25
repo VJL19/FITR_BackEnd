@@ -30,11 +30,7 @@ type TMyAuthToken = {
   };
 };
 
-const verifyTokenGuestWeb = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const verifyAuthWeb = (req: Request, res: Response, next: NextFunction) => {
   const accessToken = req.cookies["accessToken"];
 
   const config = loadConfig();
@@ -58,8 +54,6 @@ const verifyTokenGuestWeb = (
           .status(400)
           .json({ error: error, status: 400, isAuthenticated: false });
 
-      const decodedToken = <IUser>decoded;
-
       res.locals.payload = decoded;
       res.locals.isAuthenticated = true;
       res.locals.accessToken = accessToken;
@@ -68,4 +62,4 @@ const verifyTokenGuestWeb = (
   );
 };
 
-export default verifyTokenGuestWeb;
+export default verifyAuthWeb;
