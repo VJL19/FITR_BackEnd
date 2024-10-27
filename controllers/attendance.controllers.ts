@@ -375,12 +375,25 @@ const getUserRFIDNumber = (req: Request, res: Response) => {
 };
 const getAllUserAttendance = (req: Request, res: Response) => {
   const query =
-    "SELECT * FROM tbl_attendance ORDER BY tbl_attendance.DateTapped DESC;";
+    "SELECT * FROM tbl_attendance WHERE DATE(SUBSTRING(tbl_attendance.DateTapped, 1, 11)) = DATE(NOW()) ORDER BY tbl_attendance.DateTapped DESC;";
   connection.query(query, (error, result) => {
     if (error) return res.status(400).json({ error: error, status: 400 });
 
     return res.status(200).json({
       message: "All user attendance get succesfully!",
+      result: result,
+      status: 200,
+    });
+  });
+};
+const getAllUserAttendanceHistory = (req: Request, res: Response) => {
+  const query =
+    "SELECT * FROM tbl_attendance ORDER BY tbl_attendance.DateTapped DESC;";
+  connection.query(query, (error, result) => {
+    if (error) return res.status(400).json({ error: error, status: 400 });
+
+    return res.status(200).json({
+      message: "All user attendance history get succesfully!",
       result: result,
       status: 200,
     });
@@ -412,6 +425,7 @@ export {
   getUserSpecificRecord,
   getUserAttendanceHistory,
   getAllUserAttendance,
+  getAllUserAttendanceHistory,
   getAllRecentAttendance,
   getUserRFIDNumber,
   getUserAttendanceHistoryByDate,

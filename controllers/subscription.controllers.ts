@@ -303,6 +303,25 @@ const getAllSubscriptionsAdminController = (req: Request, res: Response) => {
 
 const getAllSubscriptionsUserController = (req: Request, res: Response) => {
   const query =
+    "SELECT s.UserID, s.SubscriptionID, u.Email, u.ContactNumber, u.ProfilePic, s.SubscriptionBy, s.SubscriptionAmount, s.SubscriptionType, s.SubscriptionMethod, s.SubscriptionStatus, s.SubscriptionEntryDate FROM tbl_subscriptions s LEFT JOIN tbl_users u ON s.UserID = u.UserID WHERE DATE(SUBSTRING(s.SubscriptionEntryDate, 1, 11)) = DATE(NOW()) ORDER BY s.SubscriptionEntryDate DESC;";
+
+  connection.query(query, (error, result) => {
+    if (error) return res.status(400).json({ error: error, status: 400 });
+
+    return res.status(200).json({
+      message:
+        "All subscriptions from user paid using mobile is successfully display!",
+      status: 200,
+      result: result,
+    });
+  });
+};
+
+const getAllSubscriptionsUserHistoryController = (
+  req: Request,
+  res: Response
+) => {
+  const query =
     "SELECT s.UserID, s.SubscriptionID, u.Email, u.ContactNumber, u.ProfilePic, s.SubscriptionBy, s.SubscriptionAmount, s.SubscriptionType, s.SubscriptionMethod, s.SubscriptionStatus, s.SubscriptionEntryDate FROM tbl_subscriptions s LEFT JOIN tbl_users u ON s.UserID = u.UserID ORDER BY s.SubscriptionEntryDate DESC;";
 
   connection.query(query, (error, result) => {
@@ -418,6 +437,7 @@ export {
   getSpecificSubscriptionUserController,
   getAllSubscriptionsAdminController,
   getAllSubscriptionsUserController,
+  getAllSubscriptionsUserHistoryController,
   getAllSubscriptionsByDateController,
   getAllRecentSubscriptionsController,
   getAllPendingSubscriptionsController,

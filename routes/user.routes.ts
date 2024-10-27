@@ -20,6 +20,8 @@ import {
   getTotalUserController,
   getTotalSessionUserController,
   getTotalMonthlyUserController,
+  adminChangeAccountController,
+  editAdminController,
 } from "../controllers/user.controllers";
 import verifyWebAuthToken from "../middlewares/verifyTokenWeb";
 import verifyAuthToken from "../middlewares/verifyToken";
@@ -44,6 +46,12 @@ admin_routes.get("/login_as_guest", loginAsGuestController);
 admin_routes.get("/logout_account", logoutUserWebController);
 admin_routes.post("/forgot_password", forgotPasswordController);
 admin_routes.post("/change_password", changePasswordController);
+admin_routes.post(
+  "/change_account",
+  verifyWebAuthToken,
+  adminChangeAccountController
+);
+admin_routes.post("/edit_account", verifyWebAuthToken, editAdminController);
 admin_routes.get(
   "/all_total_session_users",
   verifyWebAuthToken,

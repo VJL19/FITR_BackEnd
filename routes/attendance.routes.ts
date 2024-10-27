@@ -14,6 +14,7 @@ import {
   getAllRecentAttendance,
   getUserAttendanceHistoryByDate,
   getUserRFIDNumber,
+  getAllUserAttendanceHistory,
 } from "../controllers/attendance.controllers";
 import verifyAuthToken from "../middlewares/verifyToken";
 import verifyWebAuthToken from "../middlewares/verifyTokenWeb";
@@ -59,6 +60,11 @@ attendance_routes_admin.get(
   "/users_attendance",
   verifyWebAuthToken,
   getAllUserAttendance
+);
+attendance_routes_admin.get(
+  "/history/users_attendance",
+  verifyWebAuthToken,
+  getAllUserAttendanceHistory
 );
 attendance_routes_admin.get(
   "/all_recent_attendance",

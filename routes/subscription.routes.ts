@@ -15,6 +15,7 @@ import {
   getAllPendingSubscriptionsController,
   getAllFulfillSubscriptionsController,
   adminCreateSubscriptionController,
+  getAllSubscriptionsUserHistoryController,
 } from "../controllers/subscription.controllers";
 
 import { Response } from "express";
@@ -28,6 +29,11 @@ user_subscription_routes.get(
   "/all_subscriptions",
   verifyWebAuthToken,
   getAllSubscriptionsUserController
+);
+user_subscription_routes.get(
+  "/history/all_subscriptions",
+  verifyWebAuthToken,
+  getAllSubscriptionsUserHistoryController
 );
 user_subscription_routes.get("/success_payment", (_, res: Response) => {
   return res.status(200).send("Success");

@@ -69,6 +69,8 @@ export const generateTokenWeb = (user: IUserPayload) => {
     GuestLogin: user.GuestLogin,
     SubscriptionType: user.SubscriptionType,
     Activation: user.Activation,
+    ProfilePic: user.ProfilePic,
+    ContactNumber: user.ContactNumber,
     RFIDNumber: user.RFIDNumber,
     Role: user.Role,
   };

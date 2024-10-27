@@ -8,6 +8,7 @@ const sendEmail = async ({
   emailTitle,
   emailDescription,
   forgotPassword,
+  changeAccount,
 }: {
   email: string;
   code: number;
@@ -15,9 +16,12 @@ const sendEmail = async ({
   emailTitle: string;
   emailDescription: string;
   forgotPassword?: boolean;
+  changeAccount?: boolean;
 }) => {
   const isForgotPasswordRequest = forgotPassword
     ? '<h1 style="text-transform: uppercase">Verify Your Account For Resetting Your Password</h1>'
+    : changeAccount
+    ? '<h1 style="text-transform: uppercase">Change Account</h1><h2>Please Verify Your Account</h2>'
     : '<h1 style="text-transform: uppercase">Thanks for Signing Up!</h1><h2>Please Verify Your Account</h2>';
 
   return new Promise((resolve, reject) => {

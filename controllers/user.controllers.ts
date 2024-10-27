@@ -580,7 +580,82 @@ const editUserController = async (req: Request, res: Response) => {
     }
   );
 };
+const editAdminController = async (req: Request, res: Response) => {
+  const {
+    UserID,
+    Username,
+    Email,
+    ContactNumber,
+    ProfilePic,
+    Password,
+    ConfirmPassword,
+  } = <IUser>req.body;
 
+  const validate_fields = edit_validator.validate({
+    UserID,
+    Username,
+    Email,
+    ProfilePic,
+    ContactNumber,
+    Password,
+    ConfirmPassword,
+  });
+
+  if (validate_fields.error) {
+    return res.status(400).json({
+      status: 400,
+      error: validate_fields.error.details[0].message,
+    });
+  }
+  const values = [
+    Username,
+    Email,
+    ContactNumber,
+    Password,
+    ConfirmPassword,
+    UserID,
+  ];
+
+  //check if the credentials entered is already exist!
+
+  const query = `UPDATE tbl_users SET Username = ?, Email = ?, ContactNumber = ?, Password = ?,ConfirmPassword = ?, ProfilePic = ? WHERE UserID = ? LIMIT 1;
+  SELECT * FROM tbl_users WHERE UserID = ?`;
+
+  const encryptedPass = await hashPassword(Password, 10);
+  const encryptedConfirmpass = encryptedPass;
+  connection.query(
+    query,
+    [
+      Username,
+      Email,
+      ContactNumber,
+      encryptedPass,
+      encryptedConfirmpass,
+      ProfilePic,
+      UserID,
+      UserID,
+    ],
+    (error, result) => {
+      if (error) {
+        console.log(error);
+        return res.status(400).json({ status: 400, error: error });
+      }
+
+      const accessToken = generateTokenWeb(result[1]);
+
+      for (let i in clients) {
+        clients[i].emit("refresh_user");
+      }
+
+      return res.status(200).json({
+        message: "Change account admin! successfully!",
+        result: result,
+        status: 200,
+        accessToken: accessToken,
+      });
+    }
+  );
+};
 const forgotPasswordController = (req: Request, res: Response) => {
   const { Email } = <IUser>req.body;
 
@@ -689,6 +764,28 @@ const sendEmailController = async (req: Request, res: Response) => {
       .json({ message: "An error is occured!", error: err });
   }
 };
+const adminChangeAccountController = async (req: Request, res: Response) => {
+  const { Email } = <IUser>req.body;
+
+  const generatedCode = generateNum();
+  try {
+    const emailRes = await sendEmail({
+      email: Email,
+      changeAccount: true,
+      code: generatedCode,
+      subject: "CHANGE ACCOUNT",
+      emailTitle: "OTP VERIFICATION CODE",
+      emailDescription:
+        "Enter the generate OTP below to complete your change account process. Note: Please don't distribute this code from anyone.",
+    });
+
+    return res.status(200).json({ result: emailRes, code: generatedCode });
+  } catch (err) {
+    return res
+      .status(400)
+      .json({ message: "An error is occured!", error: err });
+  }
+};
 
 const getUsersController = (req: Request, res: Response) => {
   const query = "SELECT * FROM tbl_users ORDER BY `UserID` DESC;";
@@ -758,6 +855,8 @@ export {
   changePasswordController,
   forgotPasswordController,
   addExpoTokenUserController,
+  adminChangeAccountController,
+  editAdminController,
   loginController,
   loginUserWebController,
   logoutUserWebController,
