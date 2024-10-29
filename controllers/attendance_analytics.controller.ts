@@ -38,7 +38,7 @@ const getWeeklySessionUserAttendeesController = (
   res: Response
 ) => {
   const selectedMonth = req.params.selectedMonth.split(":")[1];
-  const query = `SET @FormatDate = date_format(str_to_date(?,'%M %d %Y'),'%c');
+  const query = `SET @FormatDate = date_format(str_to_date('${selectedMonth}/1/2024','%M/%d/%Y'),'%c');
   SET @StartDate = DATE_SUB(DATE(CONCAT("2024-",@formatDate, "-01")),INTERVAL (DAY(DATE(CONCAT("2024-",@formatDate, "-01")))-1) DAY);
   SET @EndDate = LAST_DAY(DATE_ADD(CONCAT("2024-",@formatDate, "-01"), INTERVAL - 0 MONTH));
   SELECT COUNT(*) as TotalAttendees, DATE_FORMAT(SUBSTRING(DateTapped, 1, 11),"%a") AS Day, DateTapped, SubscriptionType, concat('Week ',week(SUBSTRING(DateTapped, 1, 11))) as 'Week' from tbl_attendance where (SUBSTRING(DateTapped, 1, 11) >= @StartDate and SUBSTRING(DateTapped, 1, 11) <= @EndDate) AND SubscriptionType = 'Session' AND TimeOut IS NOT NULL AND DATE_FORMAT(SUBSTRING(DateTapped, 1, 11), "%M") = ? group by week(SUBSTRING(DateTapped, 1, 11));`;
@@ -58,7 +58,7 @@ const getWeeklyMonthlyUserAttendeesController = (
   res: Response
 ) => {
   const selectedMonth = req.params.selectedMonth.split(":")[1];
-  const query = `SET @FormatDate = date_format(str_to_date(?,'%M %d %Y'),'%c');
+  const query = `SET @FormatDate = date_format(str_to_date('${selectedMonth}/1/2024','%M/%d/%Y'),'%c');
   SET @StartDate = DATE_SUB(DATE(CONCAT("2024-",@formatDate, "-01")),INTERVAL (DAY(DATE(CONCAT("2024-",@formatDate, "-01")))-1) DAY);
   SET @EndDate = LAST_DAY(DATE_ADD(CONCAT("2024-",@formatDate, "-01"), INTERVAL - 0 MONTH));
   SELECT COUNT(*) as TotalAttendees, DATE_FORMAT(SUBSTRING(DateTapped, 1, 11),"%a") AS Day, DateTapped, SubscriptionType, concat('Week ',week(SUBSTRING(DateTapped, 1, 11))) as 'Week' from tbl_attendance where (SUBSTRING(DateTapped, 1, 11) >= @StartDate and SUBSTRING(DateTapped, 1, 11) <= @EndDate) AND SubscriptionType = 'Monthly' AND TimeOut IS NOT NULL AND DATE_FORMAT(SUBSTRING(DateTapped, 1, 11), "%M") = ? group by week(SUBSTRING(DateTapped, 1, 11));`;

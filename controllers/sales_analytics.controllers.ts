@@ -80,7 +80,7 @@ const getMonthlyMUserGrowthRateController = (req: Request, res: Response) => {
 };
 const getWeeklySessionUserSalesController = (req: Request, res: Response) => {
   const selectedMonth = req.params.selectedMonth.split(":")[1];
-  const query = `SET @FormatDate = date_format(str_to_date(?,'%M %d %Y'),'%c');
+  const query = `SET @FormatDate = date_format(str_to_date('${selectedMonth}/1/2024','%M/%d/%Y'),'%c');
 
   SET @StartDate = DATE_SUB(DATE(CONCAT("2024-",@formatDate, "-01")),INTERVAL (DAY(DATE(CONCAT("2024-",@formatDate, "-01")))-1) DAY);
   SET @EndDate = LAST_DAY(DATE_ADD(CONCAT("2024-",@formatDate, "-01"), INTERVAL - 0 MONTH));
@@ -98,7 +98,7 @@ const getWeeklySessionUserSalesController = (req: Request, res: Response) => {
 };
 const getWeeklyMonthlyUserSalesController = (req: Request, res: Response) => {
   const selectedMonth = req.params.selectedMonth.split(":")[1];
-  const query = `SET @FormatDate = date_format(str_to_date(?,'%M %d %Y'),'%c');
+  const query = `SET @FormatDate = date_format(str_to_date('${selectedMonth}/1/2024','%M/%d/%Y'),'%c');
 
   SET @StartDate = DATE_SUB(DATE(CONCAT("2024-",@formatDate, "-01")),INTERVAL (DAY(DATE(CONCAT("2024-",@formatDate, "-01")))-1) DAY);
   SET @EndDate = LAST_DAY(DATE_ADD(CONCAT("2024-",@formatDate, "-01"), INTERVAL - 0 MONTH));
