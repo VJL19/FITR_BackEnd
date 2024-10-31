@@ -17,6 +17,7 @@ interface IUser {
   SubscriptionType: string;
   Gender: string;
   RFIDNumber?: string;
+  IsRFIDActive?: string;
   Activation?: string;
   Role?: string;
   GuestLogin?: boolean;

@@ -48,7 +48,8 @@ const register_validator = Joi.object<IUser>({
   Gender: Joi.string().required(),
   Address: Joi.string().required(),
   SubscriptionType: Joi.string().required(),
-  RFIDNumber: Joi.string().allow("").optional(),
+  RFIDNumber: Joi.string().allow("").allow(null).optional(),
+  IsRFIDActive: Joi.string().allow("").allow(null).optional(),
 });
 
 const forgot_password_validator = Joi.object<IUser>({

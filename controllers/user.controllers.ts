@@ -104,11 +104,12 @@ const registerController = async (
     SubscriptionType,
     "not activated",
     null,
+    null,
     "User",
     null,
   ];
   const query =
-    "INSERT INTO tbl_users (`LastName`, `FirstName`, `MiddleName`, `Age`, `Birthday`, `ContactNumber`, `Address`, `Email`, `Height`, `Weight`, `Username`, `Password`, `ConfirmPassword`, `ProfilePic`, `Gender`, `SubscriptionType`, `Activation`, `RFIDNumber`, `Role`, `ExpoNotifToken`) VALUES (?)";
+    "INSERT INTO tbl_users (`LastName`, `FirstName`, `MiddleName`, `Age`, `Birthday`, `ContactNumber`, `Address`, `Email`, `Height`, `Weight`, `Username`, `Password`, `ConfirmPassword`, `ProfilePic`, `Gender`, `SubscriptionType`, `Activation`, `RFIDNumber`, `IsRFIDActive`, `Role`, `ExpoNotifToken`) VALUES (?)";
 
   connection.query(query, [values], (error, result: IUser[]) => {
     if (error)
@@ -139,6 +140,7 @@ const adminRegisterUserController = async (req: Request, res: Response) => {
     Birthday,
     SubscriptionType,
     RFIDNumber,
+    IsRFIDActive,
   } = <IUser>req.body;
 
   const validate_fields = register_validator.validate({
@@ -159,6 +161,7 @@ const adminRegisterUserController = async (req: Request, res: Response) => {
     Birthday,
     SubscriptionType,
     RFIDNumber,
+    IsRFIDActive,
   });
 
   if (validate_fields.error) {
@@ -188,12 +191,13 @@ const adminRegisterUserController = async (req: Request, res: Response) => {
     Gender,
     SubscriptionType,
     "not activated",
-    null,
+    RFIDNumber,
+    IsRFIDActive,
     "User",
     null,
   ];
   const query =
-    "INSERT INTO tbl_users (`LastName`, `FirstName`, `MiddleName`, `Age`, `Birthday`, `ContactNumber`, `Address`, `Email`, `Height`, `Weight`, `Username`, `Password`, `ConfirmPassword`, `ProfilePic`, `Gender`, `SubscriptionType`, `Activation`, `RFIDNumber`, `Role`, `ExpoNotifToken`) VALUES (?)";
+    "INSERT INTO tbl_users (`LastName`, `FirstName`, `MiddleName`, `Age`, `Birthday`, `ContactNumber`, `Address`, `Email`, `Height`, `Weight`, `Username`, `Password`, `ConfirmPassword`, `ProfilePic`, `Gender`, `SubscriptionType`, `Activation`, `RFIDNumber`, `IsRFIDActive`, `Role`, `ExpoNotifToken`) VALUES (?)";
 
   connection.query(query, [values], (error, result: IUser[]) => {
     if (error)
@@ -204,7 +208,9 @@ const adminRegisterUserController = async (req: Request, res: Response) => {
 };
 
 const updateUserSubscription = async (req: Request, res: Response) => {
-  const { UserID, SubscriptionType, RFIDNumber } = <IUser>req.body;
+  const { UserID, SubscriptionType, RFIDNumber, IsRFIDActive } = <IUser>(
+    req.body
+  );
 
   const queryExpiration =
     "SELECT * FROM tbl_attendance WHERE `UserID` = ? AND Date(SubscriptionExpectedEnd) > NOW()";
@@ -222,11 +228,11 @@ const updateUserSubscription = async (req: Request, res: Response) => {
     }
 
     const query =
-      "UPDATE tbl_users SET `SubscriptionType` = ?, `RFIDNumber` = ? WHERE `UserID` = ? LIMIT 1;SELECT * FROM tbl_users where UserID = (?) LIMIT 1;";
+      "UPDATE tbl_users SET `SubscriptionType` = ?, `RFIDNumber` = ?, `IsRFIDActive` = ? WHERE `UserID` = ? LIMIT 1;SELECT * FROM tbl_users where UserID = (?) LIMIT 1;";
 
     connection.query(
       query,
-      [SubscriptionType, RFIDNumber, UserID, UserID],
+      [SubscriptionType, RFIDNumber, IsRFIDActive, UserID, UserID],
       (error, result) => {
         if (error)
           return res

@@ -51,6 +51,14 @@ const checkUserRFIDExist = (req: Request, res: Response) => {
       });
     }
 
+    if (result[0].IsRFIDActive === "Not Active") {
+      return res.status(400).json({
+        status: 401,
+        message:
+          "This RFID Status is not active! Please contact gym owner to change for this RFID status!",
+      });
+    }
+
     return res.status(200).json({
       message: "This user has RFID number",
       user: result[0],
