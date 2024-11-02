@@ -10,6 +10,7 @@ const edit_validator = Joi.object<IUser>({
     .message("Only .com and .ph email are allowed.")
     .required(),
   ContactNumber: Joi.string().max(11).required(),
+  RFIDNumber: Joi.string().allow("").allow(null).optional(),
   Password: Joi.string().alphanum().min(5).max(30).required(),
   ConfirmPassword: Joi.any()
     .valid(Joi.ref("Password"))

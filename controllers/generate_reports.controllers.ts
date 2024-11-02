@@ -4,14 +4,12 @@ import IGenerateReport from "../utils/types/generate_report.types";
 
 //attendance reports controllers.
 const getAttendanceSpecificDate = (req: Request, res: Response) => {
-  const selectedDate = req.params.selectedDate.split(":")[1];
-
+  const { startDate, endDate } = req.body;
   //format date here to = "YYYY--MM--DD hh:mm:ss";
 
   const query =
-    "SELECT * FROM tbl_attendance WHERE DATE(`DateTapped`) = DATE(?)";
-
-  connection.query(query, [selectedDate], (error, result) => {
+    "SELECT * FROM tbl_attendance WHERE DATE(`DateTapped`) BETWEEN DATE(?) AND DATE(?) ORDER BY DateTapped ASC;";
+  connection.query(query, [startDate, endDate], (error, result) => {
     if (error) return res.status(400).json({ error: error, status: 400 });
 
     return res.status(200).json({
@@ -30,7 +28,7 @@ const getTotalMonthlyUsersAttendanceBySpecificDate = (
   //format date here to = "YYYY--MM--DD hh:mm:ss";
 
   const query =
-    "SELECT COUNT(DISTINCT(UserID)) as TotalMonthlyUsers FROM tbl_attendance WHERE DATE(`DateTapped`) = DATE(?) AND SubscriptionType = 'Monthly';";
+    "SELECT COUNT(*) as TotalMonthlyUsers FROM tbl_attendance WHERE DATE(`DateTapped`) = DATE(?) AND SubscriptionType = 'Monthly';";
 
   connection.query(query, [selectedDate], (error, result) => {
     if (error) return res.status(400).json({ error: error, status: 400 });
@@ -52,7 +50,7 @@ const getTotalSessionUsersAttendanceBySpecificDate = (
   //format date here to = "YYYY--MM--DD hh:mm:ss";
 
   const query =
-    "SELECT COUNT(DISTINCT(UserID)) as TotalSessionUsers FROM tbl_attendance WHERE DATE(`DateTapped`) = DATE(?) AND SubscriptionType = 'Session';";
+    "SELECT COUNT(*) as TotalSessionUsers FROM tbl_attendance WHERE DATE(`DateTapped`) = DATE(?) AND SubscriptionType = 'Session';";
 
   connection.query(query, [selectedDate], (error, result) => {
     if (error) return res.status(400).json({ error: error, status: 400 });

@@ -147,12 +147,12 @@ const fulfillSubscriptionController = (req: Request, res: Response) => {
 };
 
 const getAllSubscriptionsByDateController = (req: Request, res: Response) => {
-  const selectedDate = req.params.selectedDate.split(":")[1];
+  const { startDate, endDate } = req.body;
 
   const query =
-    "SELECT s.UserID,  s.SubscriptionID, u.LastName, u.FirstName, u.MiddleName, s.SubscriptionAmount, s.SubscriptionType, s.SubscriptionStatus, s.SubscriptionEntryDate FROM tbl_subscriptions s LEFT JOIN tbl_users u ON s.UserID = u.UserID WHERE DATE(s.SubscriptionEntryDate) = DATE(?) AND s.SubscriptionStatus = 'Fulfill';";
+    "SELECT s.UserID, s.SubscriptionID, s.SubscriptionBy, u.LastName, u.FirstName, u.MiddleName, s.SubscriptionAmount, s.SubscriptionType, s.SubscriptionStatus, s.SubscriptionEntryDate FROM tbl_subscriptions s LEFT JOIN tbl_users u ON s.UserID = u.UserID WHERE DATE(s.SubscriptionEntryDate) BETWEEN Date(?) AND Date(?) AND s.SubscriptionStatus = 'Fulfill' ORDER BY s.SubscriptionEntryDate ASC;";
 
-  connection.query(query, [selectedDate], (error, result) => {
+  connection.query(query, [startDate, endDate], (error, result) => {
     if (error) return res.status(400).json({ error: error, status: 400 });
 
     return res.status(200).json({
@@ -316,6 +316,24 @@ const getAllSubscriptionsUserController = (req: Request, res: Response) => {
     });
   });
 };
+const getAllSubscriptionsTotalTodayController = (
+  req: Request,
+  res: Response
+) => {
+  const query =
+    "SELECT COUNT(*) as TotalTodayTransactions FROM tbl_subscriptions s LEFT JOIN tbl_users u ON s.UserID = u.UserID WHERE DATE(SUBSTRING(s.SubscriptionEntryDate, 1, 11)) = DATE(NOW()) ORDER BY s.SubscriptionEntryDate DESC;";
+
+  connection.query(query, (error, result) => {
+    if (error) return res.status(400).json({ error: error, status: 400 });
+
+    return res.status(200).json({
+      message:
+        "All total subscriptions today from user paid using mobile is successfully display!",
+      status: 200,
+      result: result,
+    });
+  });
+};
 
 const getAllSubscriptionsUserHistoryController = (
   req: Request,
@@ -437,6 +455,7 @@ export {
   getSpecificSubscriptionUserController,
   getAllSubscriptionsAdminController,
   getAllSubscriptionsUserController,
+  getAllSubscriptionsTotalTodayController,
   getAllSubscriptionsUserHistoryController,
   getAllSubscriptionsByDateController,
   getAllRecentSubscriptionsController,

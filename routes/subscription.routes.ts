@@ -16,6 +16,7 @@ import {
   getAllFulfillSubscriptionsController,
   adminCreateSubscriptionController,
   getAllSubscriptionsUserHistoryController,
+  getAllSubscriptionsTotalTodayController,
 } from "../controllers/subscription.controllers";
 
 import { Response } from "express";
@@ -29,6 +30,11 @@ user_subscription_routes.get(
   "/all_subscriptions",
   verifyWebAuthToken,
   getAllSubscriptionsUserController
+);
+user_subscription_routes.get(
+  "/all_total_subscriptions",
+  verifyWebAuthToken,
+  getAllSubscriptionsTotalTodayController
 );
 user_subscription_routes.get(
   "/history/all_subscriptions",
@@ -72,8 +78,8 @@ admin_subscription_routes.post(
   adminCreateSubscriptionController
 );
 
-admin_subscription_routes.get(
-  "/all_subscriptions_by_date/:selectedDate",
+admin_subscription_routes.post(
+  "/all_subscriptions_by_date",
   verifyWebAuthToken,
   getAllSubscriptionsByDateController
 );

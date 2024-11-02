@@ -593,6 +593,7 @@ const editAdminController = async (req: Request, res: Response) => {
     Email,
     ContactNumber,
     ProfilePic,
+    RFIDNumber,
     Password,
     ConfirmPassword,
   } = <IUser>req.body;
@@ -602,6 +603,7 @@ const editAdminController = async (req: Request, res: Response) => {
     Username,
     Email,
     ProfilePic,
+    RFIDNumber,
     ContactNumber,
     Password,
     ConfirmPassword,
@@ -624,7 +626,7 @@ const editAdminController = async (req: Request, res: Response) => {
 
   //check if the credentials entered is already exist!
 
-  const query = `UPDATE tbl_users SET Username = ?, Email = ?, ContactNumber = ?, Password = ?,ConfirmPassword = ?, ProfilePic = ? WHERE UserID = ? LIMIT 1;
+  const query = `UPDATE tbl_users SET Username = ?, Email = ?, ContactNumber = ?, RFIDNumber = ?, Password = ?,ConfirmPassword = ?, ProfilePic = ? WHERE UserID = ? LIMIT 1;
   SELECT * FROM tbl_users WHERE UserID = ?`;
 
   const encryptedPass = await hashPassword(Password, 10);
@@ -635,6 +637,7 @@ const editAdminController = async (req: Request, res: Response) => {
       Username,
       Email,
       ContactNumber,
+      RFIDNumber,
       encryptedPass,
       encryptedConfirmpass,
       ProfilePic,
@@ -644,7 +647,9 @@ const editAdminController = async (req: Request, res: Response) => {
     (error, result) => {
       if (error) {
         console.log(error);
-        return res.status(400).json({ status: 400, error: error });
+        return res
+          .status(400)
+          .json({ status: 400, error: error, message: error.sqlMessage });
       }
 
       const accessToken = generateTokenWeb(result[1]);
@@ -794,7 +799,8 @@ const adminChangeAccountController = async (req: Request, res: Response) => {
 };
 
 const getUsersController = (req: Request, res: Response) => {
-  const query = "SELECT * FROM tbl_users ORDER BY `UserID` DESC;";
+  const query =
+    "SELECT * FROM tbl_users WHERE Role != 'Admin' ORDER BY `UserID` DESC;";
 
   connection.query(query, (error, result) => {
     if (error) return res.status(400).json({ error: error, status: 400 });

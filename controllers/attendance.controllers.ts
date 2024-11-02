@@ -59,6 +59,14 @@ const checkUserRFIDExist = (req: Request, res: Response) => {
       });
     }
 
+    if (result[0].Role === "Admin") {
+      return res.status(400).json({
+        status: 401,
+        message:
+          "This RFID card is a spared card and cannot be used for time in",
+      });
+    }
+
     return res.status(200).json({
       message: "This user has RFID number",
       user: result[0],
@@ -90,8 +98,8 @@ const createUserRecordController = (req: Request, res: Response) => {
     FirstName,
     SubscriptionType,
     DateTapped,
-    SubscriptionExpectedEnd,
-    IsPaid,
+    TimeIn,
+    TimeOut,
   } = <IAttendance>req.body;
 
   const validate_create_fields = create_userRecord_validator.validate({
@@ -100,8 +108,8 @@ const createUserRecordController = (req: Request, res: Response) => {
     FirstName,
     SubscriptionType,
     DateTapped,
-    SubscriptionExpectedEnd,
-    IsPaid,
+    TimeIn,
+    TimeOut,
   });
 
   if (validate_create_fields.error) {
@@ -111,16 +119,19 @@ const createUserRecordController = (req: Request, res: Response) => {
     });
   }
   const query =
-    "INSERT INTO tbl_attendance (`ProfilePic`, `LastName`, `FirstName`, `SubscriptionType`, `DateTapped`, `SubscriptionExpectedEnd`, `IsPaid`) VALUES (?) LIMIT 1;";
+    "INSERT INTO tbl_attendance (`UserID`, `ProfilePic`, `LastName`, `FirstName`, `SubscriptionType`, `TimeIn`, `TimeOut`, `DateTapped`, `SubscriptionExpectedEnd`, `IsPaid`) VALUES (?) LIMIT 1;";
 
   const values = [
-    ProfilePic,
+    null,
+    "default_poster.png",
     LastName,
     FirstName,
     SubscriptionType,
+    TimeIn,
+    TimeOut,
     DateTapped,
-    SubscriptionExpectedEnd,
-    IsPaid,
+    null,
+    "false",
   ];
 
   connection.query(query, [values], (error, result) => {
@@ -135,26 +146,12 @@ const createUserRecordController = (req: Request, res: Response) => {
 };
 
 const editUserRecordController = (req: Request, res: Response) => {
-  const {
-    AttendanceID,
-    ProfilePic,
-    LastName,
-    FirstName,
-    SubscriptionType,
-    DateTapped,
-    SubscriptionExpectedEnd,
-    IsPaid,
-  } = <IAttendance>req.body;
+  const { AttendanceID, TimeIn, TimeOut, DateTapped } = <IAttendance>req.body;
 
   const validate_edit_fields = edit_userRecord_validator.validate({
     AttendanceID,
-    ProfilePic,
-    LastName,
-    FirstName,
-    SubscriptionType,
-    DateTapped,
-    SubscriptionExpectedEnd,
-    IsPaid,
+    TimeIn,
+    TimeOut,
   });
 
   if (validate_edit_fields.error) {
@@ -164,34 +161,21 @@ const editUserRecordController = (req: Request, res: Response) => {
     });
   }
   const query =
-    "UPDATE tbl_attendance SET `ProfilePic` = ?, `LastName` = ?, `FirstName` = ?, `SubscriptionType` = ?, `DateTapped` = ?, `SubscriptionExpectedEnd` = ?,`IsPaid` = ? WHERE `AttendanceID` = ? LIMIT 1;";
+    "UPDATE tbl_attendance SET `TimeIn` = ?, `TimeOut` = ? WHERE `AttendanceID` = ? LIMIT 1;";
 
-  connection.query(
-    query,
-    [
-      ProfilePic,
-      LastName,
-      FirstName,
-      SubscriptionType,
-      DateTapped,
-      SubscriptionExpectedEnd,
-      IsPaid,
-      AttendanceID,
-    ],
-    (error, result) => {
-      if (error) return res.status(400).json({ error: error, status: 400 });
+  connection.query(query, [TimeIn, TimeOut, AttendanceID], (error, result) => {
+    if (error) return res.status(400).json({ error: error, status: 400 });
 
-      return res.status(200).json({
-        message: "User record is edited successfully!",
-        status: 200,
-        result: result,
-      });
-    }
-  );
+    return res.status(200).json({
+      message: "User record is edited successfully!",
+      status: 200,
+      result: result,
+    });
+  });
 };
 
 const deleteUserRecordController = (req: Request, res: Response) => {
-  const AttendanceID = req.params.AttendanceID;
+  const AttendanceID = req.params.AttendanceID.split(":")[1];
 
   const validate_delete_fields = delete_userRecord_validator.validate({
     AttendanceID,
@@ -383,7 +367,7 @@ const getUserRFIDNumber = (req: Request, res: Response) => {
 };
 const getAllUserAttendance = (req: Request, res: Response) => {
   const query =
-    "SELECT * FROM tbl_attendance WHERE DATE(SUBSTRING(tbl_attendance.DateTapped, 1, 11)) = DATE(NOW()) ORDER BY tbl_attendance.DateTapped DESC;";
+    "SELECT * FROM tbl_attendance WHERE DATE(SUBSTRING(tbl_attendance.DateTapped, 1, 11)) = DATE(NOW()) ORDER BY AttendanceID DESC;";
   connection.query(query, (error, result) => {
     if (error) return res.status(400).json({ error: error, status: 400 });
 
@@ -394,9 +378,21 @@ const getAllUserAttendance = (req: Request, res: Response) => {
     });
   });
 };
-const getAllUserAttendanceHistory = (req: Request, res: Response) => {
+const getAllUserTotalTodayAttendance = (req: Request, res: Response) => {
   const query =
-    "SELECT * FROM tbl_attendance ORDER BY tbl_attendance.DateTapped DESC;";
+    "SELECT COUNT(*) AS TotalTodaysAttendees FROM tbl_attendance WHERE DATE(SUBSTRING(tbl_attendance.DateTapped, 1, 11)) = DATE(NOW())";
+  connection.query(query, (error, result) => {
+    if (error) return res.status(400).json({ error: error, status: 400 });
+
+    return res.status(200).json({
+      message: "All user total todays attendance get succesfully!",
+      result: result,
+      status: 200,
+    });
+  });
+};
+const getAllUserAttendanceHistory = (req: Request, res: Response) => {
+  const query = "SELECT * FROM tbl_attendance ORDER BY AttendanceID DESC;";
   connection.query(query, (error, result) => {
     if (error) return res.status(400).json({ error: error, status: 400 });
 
@@ -435,6 +431,7 @@ export {
   getAllUserAttendance,
   getAllUserAttendanceHistory,
   getAllRecentAttendance,
+  getAllUserTotalTodayAttendance,
   getUserRFIDNumber,
   getUserAttendanceHistoryByDate,
 };

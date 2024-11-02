@@ -17,8 +17,8 @@ import verifyWebAuthToken from "../middlewares/verifyTokenWeb";
 const generate_reports_routes = express.Router();
 
 //for attendance report routes.
-generate_reports_routes.get(
-  "/attendance/specific_date:selectedDate",
+generate_reports_routes.post(
+  "/attendance/specific_date",
   verifyWebAuthToken,
   getAttendanceSpecificDate
 );

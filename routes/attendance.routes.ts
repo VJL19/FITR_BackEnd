@@ -9,6 +9,7 @@ import {
   checkUserTapRFID,
   checkUserRFIDExist,
   getUserSpecificRecord,
+  getAllUserTotalTodayAttendance,
   getUserAttendanceHistory,
   getAllUserAttendance,
   getAllRecentAttendance,
@@ -60,6 +61,11 @@ attendance_routes_admin.get(
   "/users_attendance",
   verifyWebAuthToken,
   getAllUserAttendance
+);
+attendance_routes_admin.get(
+  "/total_users_attendance",
+  verifyWebAuthToken,
+  getAllUserTotalTodayAttendance
 );
 attendance_routes_admin.get(
   "/history/users_attendance",
