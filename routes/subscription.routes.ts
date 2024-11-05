@@ -12,6 +12,8 @@ import {
   getSubscriptionHistoryByDateController,
   getAllSubscriptionsByDateController,
   getAllRecentSubscriptionsController,
+  getUserSessionSubscriptionAlreadyPaidController,
+  getUserMonthlySubscriptionAlreadyPaidController,
   getAllPendingSubscriptionsController,
   getAllFulfillSubscriptionsController,
   adminCreateSubscriptionController,
@@ -47,6 +49,14 @@ user_subscription_routes.get("/success_payment", (_, res: Response) => {
 user_subscription_routes.get(
   "/specific_subscription:UserID",
   getSpecificSubscriptionUserController
+);
+user_subscription_routes.get(
+  "/check_session_paid:UserID",
+  getUserSessionSubscriptionAlreadyPaidController
+);
+user_subscription_routes.get(
+  "/check_monthly_paid:UserID",
+  getUserMonthlySubscriptionAlreadyPaidController
 );
 user_subscription_routes.get(
   "/subscription_history:UserID",

@@ -119,7 +119,7 @@ const getWeeklyMonthlyUserGrowthRateController = (
   res: Response
 ) => {
   const selectedMonth = req.params.selectedMonth.split(":")[1];
-  const query = `SET @FormatDate = date_format(str_to_date(?,'%M'),'%c');
+  const query = `SET @FormatDate = date_format(str_to_date('${selectedMonth}/1/2024','%M/%d/%Y'),'%c');
   SET @StartDate = DATE_SUB(DATE(CONCAT("2024-",@formatDate, "-01")),INTERVAL (DAY(DATE(CONCAT("2024-",@formatDate, "-01")))-1) DAY);
   SET @EndDate = LAST_DAY(DATE_ADD(CONCAT("2024-",@formatDate, "-01"), INTERVAL - 0 MONTH));
   
@@ -128,7 +128,7 @@ const getWeeklyMonthlyUserGrowthRateController = (
       @last_entry := TotalSalesPerWeek
       from
       (select @last_entry := 0) x,
-      (SELECT SubscriptionType, SubscriptionEntryDate, concat('Week ',week(SubscriptionEntryDate)) as 'Week', ROUND(sum(SubscriptionAmount), 2) as 'TotalSalesPerWeek' from tbl_subscriptions where (SubscriptionEntryDate >= @StartDate and SubscriptionEntryDate <= @EndDate) AND SubscriptionType = 'Monthly' AND SubscriptionStatus = 'Fulfill' AND DATE_FORMAT(SubscriptionEntryDate, "%M") = ? group by week(SubscriptionEntryDate)) y`;
+      (SELECT SubscriptionType, SubscriptionEntryDate, concat('Week ',week(SubscriptionEntryDate)) as 'Week', ROUND(sum(SubscriptionAmount), 2) as 'TotalSalesPerWeek' from tbl_subscriptions where (SubscriptionEntryDate >= @StartDate and SubscriptionEntryDate <= @EndDate) AND SubscriptionType = 'Monthly' AND SubscriptionStatus = 'Fulfill' AND DATE_FORMAT(SubscriptionEntryDate, "%M") = '${selectedMonth}' group by week(SubscriptionEntryDate)) y`;
 
   connection.query(query, [selectedMonth, selectedMonth], (error, result) => {
     if (error) return res.status(400).json({ error: error, status: 400 });
@@ -146,7 +146,7 @@ const getWeeklySessionUserGrowthRateController = (
   res: Response
 ) => {
   const selectedMonth = req.params.selectedMonth.split(":")[1];
-  const query = `SET @FormatDate = date_format(str_to_date(?,'%M'),'%c');
+  const query = `SET @FormatDate = date_format(str_to_date('${selectedMonth}/1/2024','%M/%d/%Y'),'%c');
   SET @StartDate = DATE_SUB(DATE(CONCAT("2024-",@formatDate, "-01")),INTERVAL (DAY(DATE(CONCAT("2024-",@formatDate, "-01")))-1) DAY);
   SET @EndDate = LAST_DAY(DATE_ADD(CONCAT("2024-",@formatDate, "-01"), INTERVAL - 0 MONTH));
   
@@ -155,7 +155,7 @@ const getWeeklySessionUserGrowthRateController = (
       @last_entry := TotalSalesPerWeek
       from
       (select @last_entry := 0) x,
-      (SELECT SubscriptionType, SubscriptionEntryDate, concat('Week ',week(SubscriptionEntryDate)) as 'Week', ROUND(sum(SubscriptionAmount), 2) as 'TotalSalesPerWeek' from tbl_subscriptions where (SubscriptionEntryDate >= @StartDate and SubscriptionEntryDate <= @EndDate) AND SubscriptionType = 'Session' AND SubscriptionStatus = 'Fulfill' AND DATE_FORMAT(SubscriptionEntryDate, "%M") = ? group by week(SubscriptionEntryDate)) y`;
+      (SELECT SubscriptionType, SubscriptionEntryDate, concat('Week ',week(SubscriptionEntryDate)) as 'Week', ROUND(sum(SubscriptionAmount), 2) as 'TotalSalesPerWeek' from tbl_subscriptions where (SubscriptionEntryDate >= @StartDate and SubscriptionEntryDate <= @EndDate) AND SubscriptionType = 'Session' AND SubscriptionStatus = 'Fulfill' AND DATE_FORMAT(SubscriptionEntryDate, "%M") = '${selectedMonth}' group by week(SubscriptionEntryDate)) y`;
 
   connection.query(query, [selectedMonth, selectedMonth], (error, result) => {
     if (error) return res.status(400).json({ error: error, status: 400 });

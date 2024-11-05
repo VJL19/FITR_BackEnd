@@ -370,6 +370,54 @@ const getSpecificSubscriptionUserController = (req: Request, res: Response) => {
     });
   });
 };
+const getUserSessionSubscriptionAlreadyPaidController = (
+  req: Request,
+  res: Response
+) => {
+  const UserID = req.params.UserID.split(":")[1];
+  const query =
+    "SELECT * FROM tbl_subscriptions WHERE UserID = ? AND SUBSTRING(SubscriptionEntryDate, 1, 11) = DATE(now()) AND SubscriptionType = 'Session' LIMIT 1;";
+
+  connection.query(query, [UserID], (error, result) => {
+    if (error) return res.status(400).json({ error: error, status: 400 });
+
+    if (result.length > 0) {
+      return res
+        .status(401)
+        .json({ message: "User session is already paid!", status: 401 });
+    }
+
+    return res.status(200).json({
+      message: "User session has a due payment!",
+      status: 200,
+      result: result,
+    });
+  });
+};
+const getUserMonthlySubscriptionAlreadyPaidController = (
+  req: Request,
+  res: Response
+) => {
+  const UserID = req.params.UserID.split(":")[1];
+  const query =
+    "SELECT * FROM tbl_subscriptions WHERE UserID = ? AND SUBSTRING(adddate(SubscriptionEntryDate,interval 30 day), 1, 11) < DATE(NOW()) AND SubscriptionType = 'Monthly' LIMIT 1";
+
+  connection.query(query, [UserID], (error, result) => {
+    if (error) return res.status(400).json({ error: error, status: 400 });
+
+    if (result.length > 0) {
+      return res
+        .status(401)
+        .json({ message: "User monthly is already paid!", status: 401 });
+    }
+
+    return res.status(200).json({
+      message: "User monthly has a due payment!",
+      status: 200,
+      result: result,
+    });
+  });
+};
 const getSubscriptionHistoryController = (req: Request, res: Response) => {
   const UserID = req.params.UserID.split(":")[1];
   const query =
@@ -453,6 +501,8 @@ export {
   getSubscriptionHistoryController,
   getSubscriptionHistoryByDateController,
   getSpecificSubscriptionUserController,
+  getUserSessionSubscriptionAlreadyPaidController,
+  getUserMonthlySubscriptionAlreadyPaidController,
   getAllSubscriptionsAdminController,
   getAllSubscriptionsUserController,
   getAllSubscriptionsTotalTodayController,

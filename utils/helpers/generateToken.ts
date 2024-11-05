@@ -51,7 +51,7 @@ const generateToken = (user: IUserPayload) => {
     user_payload,
     config.ACCESS_TOKEN_SECRET as Secret,
     {
-      expiresIn: "20m",
+      expiresIn: "1d",
     }
   );
 
@@ -78,7 +78,7 @@ export const generateTokenWeb = (user: IUserPayload) => {
     user_payload,
     config.ACCESS_TOKEN_SECRET as Secret,
     {
-      expiresIn: "20m",
+      expiresIn: "1d",
     }
   );
 

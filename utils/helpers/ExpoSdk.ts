@@ -2,14 +2,15 @@ import { Expo } from "expo-server-sdk";
 
 const sendPushNotification = async (
   targetExpoPushToken: string,
-  message: string
+  message: string,
+  title: string
 ) => {
   const expo = new Expo();
   const chunks = expo.chunkPushNotifications([
     {
       to: targetExpoPushToken,
       sound: "default",
-      title: "Expiration Notice from FITR",
+      title: title,
       body: message,
     },
   ]);

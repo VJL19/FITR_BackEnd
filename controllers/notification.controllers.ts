@@ -252,7 +252,8 @@ const expoSendNotification = async (req: Request, res: Response) => {
   if (Expo.isExpoPushToken(expoPushToken))
     await sendPushNotification(
       expoPushToken,
-      "This is sent from back-end express :)"
+      "This is sent from back-end express :)",
+      "FITR Monthly Expiration Notice!"
     );
 
   return res
