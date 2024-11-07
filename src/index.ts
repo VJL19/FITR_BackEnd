@@ -32,6 +32,10 @@ import {
   attendance_analytics,
 } from "../routes/index.routes";
 import cookieParser from "cookie-parser";
+import cron from "node-cron";
+import connection from "../config/mysql";
+import IUser from "../utils/types/user.types";
+import { MysqlError } from "mysql";
 //initialize the top of the function express.
 const app = express();
 
@@ -44,6 +48,19 @@ const io = new Server(server, {
     origin: ["http://localhost:8081", "http://localhost:5173"],
   },
 });
+
+//schedule a task to run every minute to call database and check whether user subscription monthly is end near or 1 day before.
+// cron.schedule("*/1 * * * *", () => {
+//   const query = "SELECT * FROM tbl_users;";
+//   connection.query(query, (error: MysqlError | null, result: IUser[]) => {
+//     if (error) throw new Error(error.sqlMessage);
+
+//     const all_users: IUser[] = [];
+//     result.forEach((user) => {
+//       all_users.push(user);
+//     });
+//   });
+// });
 
 const config = loadConfig();
 //middlewares

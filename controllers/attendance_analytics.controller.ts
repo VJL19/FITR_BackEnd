@@ -5,7 +5,7 @@ const getDailySessionUserAttendeesController = (
   req: Request,
   res: Response
 ) => {
-  const query = `SELECT COUNT(*) as TotalAttendees, DATE_FORMAT(SUBSTRING(DateTapped, 1, 11),"%a") AS Day, DateTapped, SubscriptionType FROM tbl_attendance WHERE TimeOut IS NOT NULL AND SubscriptionType = 'Session' AND SUBSTRING(DateTapped, 1, 11) >= CURRENT_DATE - INTERVAL 7 DAY AND SUBSTRING(DateTapped, 1, 11) < CURRENT_DATE + INTERVAL 1 DAY GROUP BY DATE_FORMAT(SUBSTRING(DateTapped, 1, 11),"%a") ORDER BY SUBSTRING(DateTapped, 1, 11) DESC;`;
+  const query = `SELECT COUNT(*) AS TotalAttendees, DATE_FORMAT(DateTapped, "%a") AS Day, SUBSTRING(DateTapped, 1, 11) AS DateTapped, SubscriptionType FROM tbl_attendance WHERE TimeOut IS NOT NULL AND SubscriptionType = 'Session' AND Date(DateTapped) >= CURRENT_DATE - INTERVAL 7 DAY AND Date(DateTapped) < CURRENT_DATE + INTERVAL 1 DAY GROUP BY Date(DateTapped), DATE_FORMAT(DateTapped, "%a") ORDER BY Date(DateTapped) DESC;`;
 
   connection.query(query, (error, result) => {
     if (error) return res.status(400).json({ error: error, status: 400 });
@@ -21,7 +21,7 @@ const getDailyMonthlyUserAttendeesController = (
   req: Request,
   res: Response
 ) => {
-  const query = `SELECT COUNT(*) as TotalAttendees, DATE_FORMAT(SUBSTRING(DateTapped, 1, 11),"%a") AS Day, DateTapped, SubscriptionType FROM tbl_attendance WHERE TimeOut IS NOT NULL AND SubscriptionType = 'Monthly' AND SUBSTRING(DateTapped, 1, 11) >= CURRENT_DATE - INTERVAL 7 DAY AND SUBSTRING(DateTapped, 1, 11) < CURRENT_DATE + INTERVAL 1 DAY GROUP BY DATE_FORMAT(SUBSTRING(DateTapped, 1, 11),"%a") ORDER BY SUBSTRING(DateTapped, 1, 11) DESC;`;
+  const query = `SELECT COUNT(*) AS TotalAttendees, DATE_FORMAT(DateTapped, "%a") AS Day, SUBSTRING(DateTapped, 1, 11) AS DateTapped, SubscriptionType FROM tbl_attendance WHERE TimeOut IS NOT NULL AND SubscriptionType = 'Monthly' AND Date(DateTapped) >= CURRENT_DATE - INTERVAL 7 DAY AND Date(DateTapped) < CURRENT_DATE + INTERVAL 1 DAY GROUP BY Date(DateTapped), DATE_FORMAT(DateTapped, "%a") ORDER BY Date(DateTapped) DESC;`;
 
   connection.query(query, (error, result) => {
     if (error) return res.status(400).json({ error: error, status: 400 });

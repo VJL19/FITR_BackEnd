@@ -10,6 +10,8 @@ import {
 } from "../utils/validations/attendance.validations";
 import IUser from "../utils/types/user.types";
 import { formatTime } from "../utils/helpers/formatTime";
+import Expo from "expo-server-sdk";
+import { sendPushNotification } from "../utils/helpers/ExpoSdk";
 
 const checkUserTapRFID = (req: Request, res: Response) => {
   const UserID = req.params.UserID.split(":")[1];
@@ -241,7 +243,7 @@ const tapRFIDCardController = (req: Request, res: Response) => {
         });
       }
       const query =
-        "INSERT INTO tbl_attendance (`UserID`, `ProfilePic`, `LastName`, `FirstName`, `SubscriptionType`, `TimeIn`, `TimeOut`, `DateTapped`, `SubscriptionExpectedEnd`,`IsPaid`) VALUES (?) LIMIT 1;";
+        "INSERT INTO tbl_attendance (`UserID`, `ProfilePic`, `LastName`, `FirstName`, `SubscriptionType`, `TimeIn`, `TimeOut`, `DateTapped`, `SubscriptionExpectedEnd`,`IsPaid`) VALUES (?) LIMIT 1; SELECT * from tbl_users WHERE `UserID` = ? LIMIT 1;";
       const values = [
         UserID,
         ProfilePic,
@@ -254,31 +256,52 @@ const tapRFIDCardController = (req: Request, res: Response) => {
         SubscriptionExpectedEnd,
         IsPaid,
       ];
-      connection.query(query, [values], (error, result) => {
-        if (error) return res.status(400).json({ error: error, status: 400 });
+      connection.query(
+        query,
+        [values, UserID],
+        async (error, result: IUser[][]) => {
+          if (error) return res.status(400).json({ error: error, status: 400 });
 
-        return res.status(200).json({
-          message: "is successfully recorded to attendance!",
-          status: 200,
-          result: result,
-        });
-      });
+          if (Expo.isExpoPushToken(result[1][0].ExpoNotifToken))
+            await sendPushNotification(
+              result[1][0].ExpoNotifToken,
+              "This notification serves that you have successfully time in the FITR records!",
+              "FITR Attendance TIME IN NOTIFICATION"
+            );
+
+          return res.status(200).json({
+            message: "is successfully recorded to attendance!",
+            status: 200,
+            result: result,
+          });
+        }
+      );
       return;
     }
     if (result.length === 1) {
       const updateTimeOut = `UPDATE tbl_attendance SET TimeOut = '${formatTime(
         new Date()
-      )}' WHERE UserID = ? ORDER BY AttendanceID DESC LIMIT 1;`;
+      )}' WHERE UserID = ? ORDER BY AttendanceID DESC LIMIT 1;SELECT * from tbl_users WHERE UserID = ? LIMIT 1;`;
 
-      connection.query(updateTimeOut, [UserID], (error, result) => {
-        if (error) return res.status(400).json({ error: error, status: 400 });
+      connection.query(
+        updateTimeOut,
+        [UserID, UserID],
+        async (error, result: IUser[][]) => {
+          if (error) return res.status(400).json({ error: error, status: 400 });
 
-        return res.status(200).json({
-          message: "has time out successfully!",
-          status: 200,
-          result: result,
-        });
-      });
+          if (Expo.isExpoPushToken(result[1][0].ExpoNotifToken))
+            await sendPushNotification(
+              result[1][0].ExpoNotifToken,
+              "This notification serves that you have successfully time out the FITR records!",
+              "FITR Attendance TIME OUT NOTIFICATION"
+            );
+          return res.status(200).json({
+            message: "has time out successfully!",
+            status: 200,
+            result: result,
+          });
+        }
+      );
       return;
     }
   });

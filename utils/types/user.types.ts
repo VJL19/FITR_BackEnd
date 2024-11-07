@@ -21,5 +21,6 @@ interface IUser {
   Activation?: string;
   Role?: string;
   GuestLogin?: boolean;
+  ExpoNotifToken?: string;
 }
 export default IUser;

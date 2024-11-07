@@ -10,6 +10,9 @@ import {
   admin_createSubscription_validator,
 } from "../utils/validations/subscription.validations";
 import clients from "../global/socket.global";
+import IUser from "../utils/types/user.types";
+import Expo from "expo-server-sdk";
+import { sendPushNotification } from "../utils/helpers/ExpoSdk";
 
 //if the user has a mobile phone.
 const createSubscriptionController = (req: Request, res: Response) => {
@@ -41,7 +44,7 @@ const createSubscriptionController = (req: Request, res: Response) => {
   }
 
   const query =
-    "INSERT INTO tbl_subscriptions (`UserID`, `SubscriptionAmount`, `SubscriptionBy`, `SubscriptionType`, `SubscriptionMethod`, `SubscriptionStatus`, `SubscriptionEntryDate`) VALUES (?, ?, ?, ?, ?, ?, ?) LIMIT 1;";
+    "INSERT INTO tbl_subscriptions (`UserID`, `SubscriptionAmount`, `SubscriptionBy`, `SubscriptionType`, `SubscriptionMethod`, `SubscriptionStatus`, `SubscriptionEntryDate`) VALUES (?, ?, ?, ?, ?, ?, ?) LIMIT 1;SELECT * FROM tbl_users WHERE `UserID` = ? LIMIT 1;";
 
   connection.query(
     query,
@@ -53,12 +56,39 @@ const createSubscriptionController = (req: Request, res: Response) => {
       SubscriptionMethod,
       SubscriptionStatus,
       SubscriptionEntryDate,
+      UserID,
     ],
-    (error, result) => {
+    async (error, result: IUser[][]) => {
       if (error) return res.status(400).json({ error: error, status: 400 });
 
       for (let i in clients) {
         clients[i].emit("refresh_transaction");
+      }
+
+      if (SubscriptionStatus === "Fulfill") {
+        if (Expo.isExpoPushToken(result[1][0].ExpoNotifToken))
+          await sendPushNotification(
+            result[1][0].ExpoNotifToken,
+            `This notification serves that your payment for ${SubscriptionType} subscription has been verified by Paymongo Service :)`,
+            "FITR Success Payment Notification"
+          );
+      }
+      if (SubscriptionStatus === "pending") {
+        if (Expo.isExpoPushToken(result[1][0].ExpoNotifToken))
+          await sendPushNotification(
+            result[1][0].ExpoNotifToken,
+            `This notification serves that your payment for ${SubscriptionType} subscription will be approved by the gym owner :)`,
+            "FITR Pending Payment Notification"
+          );
+      }
+
+      if (SubscriptionStatus === "reject") {
+        if (Expo.isExpoPushToken(result[1][0].ExpoNotifToken))
+          await sendPushNotification(
+            result[1][0].ExpoNotifToken,
+            `This notification serves that your payment for ${SubscriptionType} subscription is rejected by the gym owner :(`,
+            "FITR Reject Payment Notification"
+          );
       }
 
       return res.status(200).json({
@@ -126,20 +156,38 @@ const fulfillSubscriptionController = (req: Request, res: Response) => {
     });
   }
   const query =
-    "UPDATE tbl_subscriptions SET `SubscriptionStatus` = ? WHERE `SubscriptionID` = ? LIMIT 1;";
+    "UPDATE tbl_subscriptions SET `SubscriptionStatus` = ? WHERE `SubscriptionID` = ? LIMIT 1; SELECT * from tbl_subscriptions WHERE `SubscriptionID` = ? LIMIT 1;";
 
   connection.query(
     query,
-    [SubscriptionStatus, SubscriptionID],
-    (error, result) => {
+    [SubscriptionStatus, SubscriptionID, SubscriptionID],
+    (error, results: IUser[][]) => {
       if (error) return res.status(400).json({ error: error, status: 400 });
 
       for (var i in clients) {
         clients[i].emit("refresh_subscriptionPage");
       }
+
+      const queryNotif = "SELECT * FROM tbl_users WHERE `UserID` = ? LIMIT 1;";
+
+      connection.query(
+        queryNotif,
+        [results[1][0].UserID],
+        async (error, result: IUser[]) => {
+          if (error) return res.status(400).json({ error: error, status: 400 });
+
+          if (Expo.isExpoPushToken(result[0].ExpoNotifToken))
+            await sendPushNotification(
+              result[0].ExpoNotifToken,
+              `This notification serves that your payment for ${results[1][0].SubscriptionType} subscription is already approved by the gym owner :)`,
+              "FITR Fulfill Payment Notification"
+            );
+        }
+      );
+
       return res.status(200).json({
         message: "Subscription fulfill successfully!",
-        result: result,
+        result: results,
         status: 200,
       });
     }
@@ -303,7 +351,7 @@ const getAllSubscriptionsAdminController = (req: Request, res: Response) => {
 
 const getAllSubscriptionsUserController = (req: Request, res: Response) => {
   const query =
-    "SELECT s.UserID, s.SubscriptionID, u.Email, u.ContactNumber, u.ProfilePic, s.SubscriptionBy, s.SubscriptionAmount, s.SubscriptionType, s.SubscriptionMethod, s.SubscriptionStatus, s.SubscriptionEntryDate FROM tbl_subscriptions s LEFT JOIN tbl_users u ON s.UserID = u.UserID WHERE DATE(SUBSTRING(s.SubscriptionEntryDate, 1, 11)) = DATE(NOW()) ORDER BY s.SubscriptionEntryDate DESC;";
+    "SELECT s.UserID, s.SubscriptionID, u.Email, u.ContactNumber, u.ProfilePic, s.SubscriptionBy, s.SubscriptionAmount, s.SubscriptionType, s.SubscriptionMethod, s.SubscriptionStatus, s.SubscriptionEntryDate FROM tbl_subscriptions s LEFT JOIN tbl_users u ON s.UserID = u.UserID WHERE DATE(SUBSTRING(s.SubscriptionEntryDate, 1, 11)) = DATE(NOW()) ORDER BY s.SubscriptionID DESC;";
 
   connection.query(query, (error, result) => {
     if (error) return res.status(400).json({ error: error, status: 400 });
@@ -340,7 +388,7 @@ const getAllSubscriptionsUserHistoryController = (
   res: Response
 ) => {
   const query =
-    "SELECT s.UserID, s.SubscriptionID, u.Email, u.ContactNumber, u.ProfilePic, s.SubscriptionBy, s.SubscriptionAmount, s.SubscriptionType, s.SubscriptionMethod, s.SubscriptionStatus, s.SubscriptionEntryDate FROM tbl_subscriptions s LEFT JOIN tbl_users u ON s.UserID = u.UserID ORDER BY s.SubscriptionEntryDate DESC;";
+    "SELECT s.UserID, s.SubscriptionID, u.Email, u.ContactNumber, u.ProfilePic, s.SubscriptionBy, s.SubscriptionAmount, s.SubscriptionType, s.SubscriptionMethod, s.SubscriptionStatus, s.SubscriptionEntryDate FROM tbl_subscriptions s LEFT JOIN tbl_users u ON s.UserID = u.UserID ORDER BY s.SubscriptionID DESC;";
 
   connection.query(query, (error, result) => {
     if (error) return res.status(400).json({ error: error, status: 400 });
@@ -357,8 +405,7 @@ const getAllSubscriptionsUserHistoryController = (
 const getSpecificSubscriptionUserController = (req: Request, res: Response) => {
   const UserID = req.params.UserID.split(":")[1];
   const query =
-    "SELECT * FROM tbl_subscriptions WHERE `UserID` = ? AND `SubscriptionStatus` = 'pending' LIMIT 1;";
-
+    "SELECT *, u.Email, u.ContactNumber FROM tbl_subscriptions tbl_s LEFT JOIN tbl_users u ON tbl_s.UserID = u.UserID WHERE u.`UserID` = ? AND tbl_s.`SubscriptionStatus` = 'pending' LIMIT 1;";
   connection.query(query, [UserID], (error, result) => {
     if (error) return res.status(400).json({ error: error, status: 400 });
 
@@ -376,22 +423,35 @@ const getUserSessionSubscriptionAlreadyPaidController = (
 ) => {
   const UserID = req.params.UserID.split(":")[1];
   const query =
-    "SELECT * FROM tbl_subscriptions WHERE UserID = ? AND SUBSTRING(SubscriptionEntryDate, 1, 11) = DATE(now()) AND SubscriptionType = 'Session' LIMIT 1;";
+    "SELECT * FROM tbl_subscriptions WHERE UserID = ? AND SUBSTRING(SubscriptionEntryDate, 1, 11) = DATE(now()) AND SubscriptionType = 'Session' LIMIT 1;SELECT * FROM tbl_attendance WHERE UserID = ? AND TimeOut != 'NULL' AND DATE(SUBSTRING(DateTapped, 1, 11)) = DATE(NOW()) AND SubscriptionType = 'Session' LIMIT 1;";
 
-  connection.query(query, [UserID], (error, result) => {
+  connection.query(query, [UserID, UserID], (error, result) => {
     if (error) return res.status(400).json({ error: error, status: 400 });
 
-    if (result.length > 0) {
-      return res
-        .status(401)
-        .json({ message: "User session is already paid!", status: 401 });
+    if (result[0].length == 0) {
+      return res.status(401).json({
+        message: "User session has a due payment!",
+        status: 401,
+        result: result,
+      });
     }
+    return res
+      .status(200)
+      .json({ message: "User session is already paid!", status: 200 });
 
-    return res.status(200).json({
-      message: "User session has a due payment!",
-      status: 200,
-      result: result,
-    });
+    // if (result[1].length > 0) {
+    //   return res.status(200).json({
+    //     message: "User session has a due payment!",
+    //     status: 200,
+    //     result: result,
+    //   });
+    // }
+
+    // return res.status(200).json({
+    //   message: "User session has a due payment!",
+    //   status: 200,
+    //   result: result,
+    // });
   });
 };
 const getUserMonthlySubscriptionAlreadyPaidController = (
@@ -400,19 +460,19 @@ const getUserMonthlySubscriptionAlreadyPaidController = (
 ) => {
   const UserID = req.params.UserID.split(":")[1];
   const query =
-    "SELECT * FROM tbl_subscriptions WHERE UserID = ? AND SUBSTRING(adddate(SubscriptionEntryDate,interval 30 day), 1, 11) < DATE(NOW()) AND SubscriptionType = 'Monthly' LIMIT 1";
-
+    "SELECT *, DATE(DATE_ADD(SubscriptionEntryDate, INTERVAL + 30 DAY)) AS SubscriptionExpectedEnd FROM tbl_subscriptions WHERE UserID = ? AND DATE(DATE_ADD(SubscriptionEntryDate, INTERVAL + 30 DAY)) >= DATE(NOW()) AND SubscriptionType = 'Monthly' LIMIT 1;";
   connection.query(query, [UserID], (error, result) => {
     if (error) return res.status(400).json({ error: error, status: 400 });
 
-    if (result.length > 0) {
-      return res
-        .status(401)
-        .json({ message: "User monthly is already paid!", status: 401 });
+    if (result.length == 0) {
+      return res.status(401).json({
+        message: "User monthly has a due payment!",
+        status: 401,
+      });
     }
 
     return res.status(200).json({
-      message: "User monthly has a due payment!",
+      message: "User monthly is already paid!",
       status: 200,
       result: result,
     });
@@ -442,8 +502,7 @@ const getSubscriptionHistoryByDateController = (
   const { UserID, selectedDate } = req.body;
 
   const query =
-    "SELECT * FROM tbl_subscriptions WHERE `UserID` = ? AND `SubscriptionStatus` != 'Pending' AND DATE(SubscriptionEntryDate) = DATE(?) ORDER BY SubscriptionEntryDate DESC;";
-
+    "SELECT * FROM tbl_subscriptions s LEFT JOIN tbl_users u on s.UserID = u.UserID WHERE s.`UserID` = ? AND s.`SubscriptionStatus` != 'Pending' AND DATE(s.SubscriptionEntryDate) = DATE(?) ORDER BY s.SubscriptionEntryDate DESC";
   connection.query(query, [UserID, selectedDate], (error, result) => {
     if (error) return res.status(400).json({ error: error, status: 400 });
 
