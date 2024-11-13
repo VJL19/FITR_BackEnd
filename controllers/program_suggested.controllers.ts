@@ -8,8 +8,9 @@ import {
 } from "../utils/validations/program_suggested.validations";
 import clients from "../global/socket.global";
 import BadWordsNext from "bad-words-next";
+import { fil } from "../utils/helpers/bad-words";
+
 const en = require("bad-words-next/data/en.json");
-const fil = require("bad-words-next/data/fil.json");
 const filter = new BadWordsNext();
 filter.add(en);
 filter.add(fil);
