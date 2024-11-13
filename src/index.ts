@@ -62,8 +62,10 @@ app.use(cookieParser());
 const io = new Server(server, {
   cors: {
     origin: [
+      "https://fitrmain-3ovtfxthq-vjl19s-projects.vercel.app/",
       "http://localhost:5173",
       "https://db52-136-158-2-214.ngrok-free.app",
+      "https://fitrmain.vercel.app/",
     ],
     allowedHeaders: ["ngrok-skip-browser-warning"],
     methods: ["GET", "POST", "PUT", "DELETE"],
@@ -75,8 +77,10 @@ const io = new Server(server, {
 app.use(
   cors({
     origin: [
+      "https://fitrmain-3ovtfxthq-vjl19s-projects.vercel.app/",
       "http://localhost:5173",
       "https://db52-136-158-2-214.ngrok-free.app",
+      "https://fitrmain.vercel.app/",
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
 
