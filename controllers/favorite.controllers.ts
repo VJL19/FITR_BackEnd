@@ -29,7 +29,7 @@ const addExerciseFavorite = (req: Request, res: Response) => {
   }
 
   const query =
-    "INSERT INTO tbl_exercises_favorites (ExerciseID, UserID, isExerciseFavorite) VALUES (?, ?, 'true') LIMIT 1;";
+    "INSERT INTO tbl_exercises_favorites (ExerciseID, UserID, isExerciseFavorite) VALUES (?, ?, 'true');";
   connection.query(query, [ExerciseID, UserID], (error, result) => {
     if (error) return res.status(400).json({ error: error, status: 400 });
 
@@ -56,7 +56,7 @@ const addWorkOutFavorite = (req: Request, res: Response) => {
     });
   }
   const query =
-    "INSERT INTO tbl_workouts_favorites (WorkOutID, UserID, isWorkOutFavorite) VALUES (?, ?, 'true') LIMIT 1;";
+    "INSERT INTO tbl_workouts_favorites (WorkOutID, UserID, isWorkOutFavorite) VALUES (?, ?, 'true');";
 
   connection.query(query, [WorkOutID, UserID], (error, result) => {
     if (error) return res.status(400).json({ error: error, status: 400 });

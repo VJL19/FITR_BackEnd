@@ -3,13 +3,16 @@ import {
   commentPostController,
   getAllCommentPostsController,
   getAllPostsController,
+  getSpecificPostsController,
   getPostComments,
+  editCommentPostsController,
   getPostLikes,
   likePostController,
   unlikePostController,
   createPostsFromFeedController,
   checkLikePostController,
   deletePostFromFeedController,
+  removeUserSpecificComment,
   removeUserComments,
   removeUserLikes,
 } from "../controllers/newsfeed.controllers";
@@ -31,6 +34,16 @@ newsfeed_routes.get(
   verifyAuthToken,
   getAllPostsController
 );
+newsfeed_routes.get(
+  "/specificPost/:NewsfeedID",
+  verifyAuthToken,
+  getSpecificPostsController
+);
+newsfeed_routes.post(
+  "/edit_comment",
+  verifyAuthToken,
+  editCommentPostsController
+);
 newsfeed_routes.get("/total_likes/:NewsfeedID", verifyAuthToken, getPostLikes);
 newsfeed_routes.get(
   "/total_comments/:NewsfeedID",
@@ -49,6 +62,11 @@ newsfeed_routes.delete(
   "/remove_user_comments/:NewsfeedID",
   verifyAuthToken,
   removeUserComments
+);
+newsfeed_routes.delete(
+  "/remove_specific_comment/:CommentID",
+  verifyAuthToken,
+  removeUserSpecificComment
 );
 newsfeed_routes.delete(
   "/remove_user_likes/:NewsfeedID",

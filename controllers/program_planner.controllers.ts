@@ -8,6 +8,12 @@ import {
   edit_program_validator,
   specific_program_validator,
 } from "../utils/validations/program_planner.validations";
+import BadWordsNext from "bad-words-next";
+const en = require("bad-words-next/data/en.json");
+const fil = require("bad-words-next/data/fil.json");
+const badwords = new BadWordsNext();
+badwords.add(en);
+badwords.add(fil);
 const createProgramController = (req: Request, res: Response) => {
   const { UserID, ProgramTitle, ProgramDescription, ProgramEntryDate } = <
     IProgram
@@ -27,9 +33,14 @@ const createProgramController = (req: Request, res: Response) => {
     });
   }
   const query =
-    "INSERT INTO tbl_program_planner (`UserID`, `ProgramTitle`, `ProgramDescription`, `ProgramEntryDate`) VALUES (?) LIMIT 1;";
+    "INSERT INTO tbl_program_planner (`UserID`, `ProgramTitle`, `ProgramDescription`, `ProgramEntryDate`) VALUES (?);";
 
-  const values = [UserID, ProgramTitle, ProgramDescription, ProgramEntryDate];
+  const values = [
+    UserID,
+    badwords.filter(ProgramTitle),
+    badwords.filter(ProgramDescription),
+    ProgramEntryDate,
+  ];
   connection.query(query, [values], (error, result) => {
     if (error) return res.status(400).json({ error: error, status: 400 });
 
@@ -69,7 +80,13 @@ const editProgramController = (req: Request, res: Response) => {
 
   connection.query(
     query,
-    [ProgramTitle, ProgramDescription, ProgramEntryDate, ProgramID, UserID],
+    [
+      badwords.filter(ProgramTitle),
+      badwords.filter(ProgramDescription),
+      ProgramEntryDate,
+      ProgramID,
+      UserID,
+    ],
     (error, result) => {
       if (error) return res.status(400).json({ error: error, status: 400 });
 

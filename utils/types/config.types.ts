@@ -11,6 +11,7 @@ interface IConfig {
   ACCESS_TOKEN_SECRET: string | undefined;
   ACCESS_TOKEN_SECRET_WEB: string | undefined;
   port: number | undefined;
+  NGROK_URL: string | undefined;
 }
 
 export default function loadConfig(): IConfig {
@@ -23,5 +24,6 @@ export default function loadConfig(): IConfig {
     ACCESS_TOKEN_SECRET: process.env.ACCESS_TOKEN_SECRET,
     ACCESS_TOKEN_SECRET_WEB: process.env.ACCESS_TOKEN_SECRET_WEB,
     port: Number(process.env.MYSQL_PORT),
+    NGROK_URL: process.env.NGROK_URL,
   };
 }

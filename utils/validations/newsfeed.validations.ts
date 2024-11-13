@@ -29,12 +29,18 @@ const comment_post_validator = Joi.object<INewsFeed>({
   CommentText: Joi.string().required(),
   CommentDate: Joi.string().required(),
 });
+const edit_comment_post_validator = Joi.object<INewsFeed>({
+  CommentID: Joi.number().required(),
+  CommentText: Joi.string().required(),
+  CommentDate: Joi.string().required(),
+});
 
 const get_comment_post_validator = Joi.object<INewsFeed>({
   NewsfeedID: Joi.number().required(),
 });
 export {
   create_post_validator_feed,
+  edit_comment_post_validator,
   like_post_validator,
   unlike_post_validator,
   comment_post_validator,

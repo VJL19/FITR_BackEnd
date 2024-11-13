@@ -135,7 +135,7 @@ const notify_user_like = (req: Request, res: Response) => {
       status: 400,
     });
   }
-  const query = `INSERT INTO tbl_notifications (UserID, PostID, NotificationAuthor, NotificationText, isMarkRead, NotifBy, NotificationType, NotificationDate) VALUES (?,?, ?,'User ${Username} likes your ${PostTitle} post!', 'false', ?, 'like_notif', ?) LIMIT 1`;
+  const query = `INSERT INTO tbl_notifications (UserID, PostID, NotificationAuthor, NotificationText, isMarkRead, NotifBy, NotificationType, NotificationDate) VALUES (?,?, ?,'User ${Username} likes your ${PostTitle} post!', 'false', ?, 'like_notif', ?);`;
 
   connection.query(
     query,
@@ -176,7 +176,7 @@ const notify_user_comment = (req: Request, res: Response) => {
     });
   }
 
-  const query = `INSERT INTO tbl_notifications (UserID, PostID, NotificationAuthor, NotificationText, isMarkRead, NotifBy, NotificationType, NotificationDate) VALUES (?, ?, ?, 'User ${Username} commented to your ${PostTitle} post!', 'false', ?, 'comment_notif', ?) LIMIT 1`;
+  const query = `INSERT INTO tbl_notifications (UserID, PostID, NotificationAuthor, NotificationText, isMarkRead, NotifBy, NotificationType, NotificationDate) VALUES (?, ?, ?, 'User ${Username} commented to your ${PostTitle} post!', 'false', ?, 'comment_notif', ?);`;
 
   connection.query(
     query,

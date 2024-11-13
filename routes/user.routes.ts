@@ -22,6 +22,7 @@ import {
   getTotalMonthlyUserController,
   adminChangeAccountController,
   editAdminController,
+  sendEmailForSubscriptionController,
 } from "../controllers/user.controllers";
 import verifyWebAuthToken from "../middlewares/verifyTokenWeb";
 import verifyAuthToken from "../middlewares/verifyToken";
@@ -38,6 +39,10 @@ user_routes.post("/edit_account", verifyAuthToken, editUserController);
 user_routes.post("/forgot_password", forgotPasswordController);
 user_routes.post("/change_password", changePasswordController);
 user_routes.post("/send_email", sendEmailController);
+user_routes.post(
+  "/send_payment_verification",
+  sendEmailForSubscriptionController
+);
 user_routes.post("/activate_account", setUserActivationController);
 
 admin_routes.get("/all_users", verifyWebAuthToken, getUsersController);

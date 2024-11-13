@@ -44,7 +44,7 @@ const createSubscriptionController = (req: Request, res: Response) => {
   }
 
   const query =
-    "INSERT INTO tbl_subscriptions (`UserID`, `SubscriptionAmount`, `SubscriptionBy`, `SubscriptionType`, `SubscriptionMethod`, `SubscriptionStatus`, `SubscriptionEntryDate`) VALUES (?, ?, ?, ?, ?, ?, ?) LIMIT 1;SELECT * FROM tbl_users WHERE `UserID` = ? LIMIT 1;";
+    "INSERT INTO tbl_subscriptions (`UserID`, `SubscriptionAmount`, `SubscriptionBy`, `SubscriptionType`, `SubscriptionMethod`, `SubscriptionStatus`, `SubscriptionEntryDate`) VALUES (?, ?, ?, ?, ?, ?, ?);SELECT * FROM tbl_users WHERE `UserID` = ? LIMIT 1;";
 
   connection.query(
     query,
@@ -72,6 +72,13 @@ const createSubscriptionController = (req: Request, res: Response) => {
             `This notification serves that your payment for ${SubscriptionType} subscription has been verified by Paymongo Service :)`,
             "FITR Success Payment Notification"
           );
+
+        //update user rfid status to active.
+
+        const query =
+          "UPDATE tbl_users SET `IsRFIDActive` = 'RFID Active' WHERE `UserID` = ? LIMIT 1;";
+
+        connection.query(query, [UserID]);
       }
       if (SubscriptionStatus === "pending") {
         if (Expo.isExpoPushToken(result[1][0].ExpoNotifToken))
@@ -164,10 +171,6 @@ const fulfillSubscriptionController = (req: Request, res: Response) => {
     (error, results: IUser[][]) => {
       if (error) return res.status(400).json({ error: error, status: 400 });
 
-      for (var i in clients) {
-        clients[i].emit("refresh_subscriptionPage");
-      }
-
       const queryNotif = "SELECT * FROM tbl_users WHERE `UserID` = ? LIMIT 1;";
 
       connection.query(
@@ -176,15 +179,36 @@ const fulfillSubscriptionController = (req: Request, res: Response) => {
         async (error, result: IUser[]) => {
           if (error) return res.status(400).json({ error: error, status: 400 });
 
-          if (Expo.isExpoPushToken(result[0].ExpoNotifToken))
-            await sendPushNotification(
-              result[0].ExpoNotifToken,
-              `This notification serves that your payment for ${results[1][0].SubscriptionType} subscription is already approved by the gym owner :)`,
-              "FITR Fulfill Payment Notification"
-            );
+          if (SubscriptionStatus === "Fulfill") {
+            const query =
+              "UPDATE tbl_users SET `IsRFIDActive` = 'RFID Active' WHERE `UserID` = ? LIMIT 1;";
+
+            connection.query(query, [results[1][0].UserID]);
+            if (Expo.isExpoPushToken(result[0].ExpoNotifToken))
+              await sendPushNotification(
+                result[0].ExpoNotifToken,
+                `This notification serves that your payment for ${results[1][0].SubscriptionType} subscription is already approved by the gym owner :)`,
+                "FITR Fulfill Payment Notification"
+              );
+          }
+
+          if (SubscriptionStatus === "reject") {
+            const query =
+              "UPDATE tbl_users SET `IsRFIDActive` = 'Not Active' WHERE `UserID` = ? LIMIT 1;";
+
+            connection.query(query, [results[1][0].UserID]);
+            if (Expo.isExpoPushToken(result[0].ExpoNotifToken))
+              await sendPushNotification(
+                result[0].ExpoNotifToken,
+                `This notification serves that your payment for ${results[1][0].SubscriptionType} subscription is rejected by the gym owner. Please do reupload your payment process ASAP :)`,
+                "FITR Reject Payment Notification"
+              );
+          }
         }
       );
-
+      for (var i in clients) {
+        clients[i].emit("refresh_subscriptionPage");
+      }
       return res.status(200).json({
         message: "Subscription fulfill successfully!",
         result: results,
@@ -238,7 +262,7 @@ const insertSubscriptionController = (req: Request, res: Response) => {
   }
 
   const query =
-    "INSERT INTO tbl_subscriptions_no_mphone (`LastName`, `FirstName`, `SubscriptionAmount`,`SubscriptionType`) VALUES (?,?,?, 'CASH', ?) LIMIT 1;";
+    "INSERT INTO tbl_subscriptions_no_mphone (`LastName`, `FirstName`, `SubscriptionAmount`,`SubscriptionType`) VALUES (?,?,?, 'CASH', ?);";
 
   connection.query(
     query,
@@ -423,18 +447,21 @@ const getUserSessionSubscriptionAlreadyPaidController = (
 ) => {
   const UserID = req.params.UserID.split(":")[1];
   const query =
-    "SELECT * FROM tbl_subscriptions WHERE UserID = ? AND SUBSTRING(SubscriptionEntryDate, 1, 11) = DATE(now()) AND SubscriptionType = 'Session' LIMIT 1;SELECT * FROM tbl_attendance WHERE UserID = ? AND TimeOut != 'NULL' AND DATE(SUBSTRING(DateTapped, 1, 11)) = DATE(NOW()) AND SubscriptionType = 'Session' LIMIT 1;";
+    "SELECT * FROM tbl_subscriptions WHERE UserID = ? AND SUBSTRING(SubscriptionEntryDate, 1, 11) = DATE(now()) AND SubscriptionType = 'Session' AND SubscriptionStatus != 'Reject' LIMIT 1;SELECT * FROM tbl_attendance WHERE UserID = ? AND TimeOut != 'NULL' AND DATE(SUBSTRING(DateTapped, 1, 11)) = DATE(NOW()) AND SubscriptionType = 'Session' LIMIT 1;";
 
   connection.query(query, [UserID, UserID], (error, result) => {
     if (error) return res.status(400).json({ error: error, status: 400 });
 
     if (result[0].length == 0) {
+      const query = `UPDATE tbl_users SET IsRFIDActive = 'Not Active' WHERE UserID = ? AND SubscriptionType = 'Session' LIMIT 1;`;
+      connection.query(query, [UserID]);
       return res.status(401).json({
         message: "User session has a due payment!",
         status: 401,
         result: result,
       });
     }
+
     return res
       .status(200)
       .json({ message: "User session is already paid!", status: 200 });
@@ -465,12 +492,18 @@ const getUserMonthlySubscriptionAlreadyPaidController = (
     if (error) return res.status(400).json({ error: error, status: 400 });
 
     if (result.length == 0) {
+      const query = `UPDATE tbl_users SET IsRFIDActive = 'Not Active' WHERE UserID = ? AND SubscriptionType = 'Monthly' LIMIT 1;`;
+      connection.query(query, [UserID]);
       return res.status(401).json({
         message: "User monthly has a due payment!",
         status: 401,
       });
     }
+    //update user rfid status to active.
+    const query =
+      "UPDATE tbl_users SET `IsRFIDActive` = 'RFID Active' WHERE `UserID` = ? LIMIT 1;";
 
+    connection.query(query, [UserID]);
     return res.status(200).json({
       message: "User monthly is already paid!",
       status: 200,

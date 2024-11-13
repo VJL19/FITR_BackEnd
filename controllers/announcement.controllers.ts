@@ -7,7 +7,12 @@ import {
 } from "../utils/validations/announcement_validations";
 import IAnnouncements from "../utils/types/announcements.types";
 import clients from "../global/socket.global";
-
+import BadWordsNext from "bad-words-next";
+const en = require("bad-words-next/data/en.json");
+const fil = require("bad-words-next/data/fil.json");
+const badwords = new BadWordsNext();
+badwords.add(en);
+badwords.add(fil);
 const all_announcements = (req: Request, res: Response) => {
   const query =
     "SELECT * FROM tbl_announcements ORDER BY `AnnouncementDate` DESC;";
@@ -79,8 +84,8 @@ const createAnnouncement = (req: Request, res: Response) => {
 
   const values = [
     AnnouncementImage,
-    AnnouncementTitle,
-    AnnouncementDescription,
+    badwords.filter(AnnouncementTitle),
+    badwords.filter(AnnouncementDescription),
     AnnouncementDate,
   ];
   connection.query(query, [values], (error, result) => {
@@ -127,8 +132,8 @@ const editAnnouncement = (req: Request, res: Response) => {
     query,
     [
       AnnouncementImage,
-      AnnouncementTitle,
-      AnnouncementDescription,
+      badwords.filter(AnnouncementTitle),
+      badwords.filter(AnnouncementDescription),
       AnnouncementDate,
       AnnouncementID,
     ],

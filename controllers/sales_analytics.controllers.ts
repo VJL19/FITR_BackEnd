@@ -11,7 +11,7 @@ import {
 
 const getMonthlySessionUserSalesController = (req: Request, res: Response) => {
   const selectedYear = req.params.selectedYear.split(":")[1];
-  const query = `SELECT SubscriptionType, DATE_FORMAT(SubscriptionEntryDate, "%M") as 'Months', ROUND(SUM(COALESCE(SubscriptionAmount, 0)), 2) AS 'TotalSalesPerMonth' FROM tbl_subscriptions WHERE SubscriptionType = 'Session' AND SubscriptionStatus = 'Fulfill' AND Year(SubscriptionEntryDate) = ? GROUP BY YEAR(SubscriptionEntryDate), MONTH(SubscriptionEntryDate);`;
+  const query = `SELECT SubscriptionType, DATE_FORMAT(SubscriptionEntryDate, "%M") as 'Months', ROUND(SUM(COALESCE(SubscriptionAmount, 0)), 2) AS 'TotalSalesPerMonth' FROM tbl_subscriptions WHERE SubscriptionType = 'Session' AND SubscriptionStatus = 'Fulfill' AND Year(SubscriptionEntryDate) = ? GROUP BY YEAR(SubscriptionEntryDate), MONTH(SubscriptionEntryDate) ORDER BY MONTH(str_to_date(MONTHS, '%M'));`;
 
   connection.query(query, [selectedYear], (error, result) => {
     if (error) return res.status(400).json({ error: error, status: 400 });
@@ -25,7 +25,7 @@ const getMonthlySessionUserSalesController = (req: Request, res: Response) => {
 };
 const getMonthlyMUserSalesController = (req: Request, res: Response) => {
   const selectedYear = req.params.selectedYear.split(":")[1];
-  const query = `SELECT SubscriptionType, DATE_FORMAT(SubscriptionEntryDate, "%M") as 'Months', ROUND(SUM(COALESCE(SubscriptionAmount, 0)), 2) AS 'TotalSalesPerMonth' FROM tbl_subscriptions WHERE SubscriptionType = 'Monthly' AND SubscriptionStatus = 'Fulfill' AND Year(SubscriptionEntryDate) = ? GROUP BY YEAR(SubscriptionEntryDate), MONTH(SubscriptionEntryDate);`;
+  const query = `SELECT SubscriptionType, DATE_FORMAT(SubscriptionEntryDate, "%M") as 'Months', ROUND(SUM(COALESCE(SubscriptionAmount, 0)), 2) AS 'TotalSalesPerMonth' FROM tbl_subscriptions WHERE SubscriptionType = 'Monthly' AND SubscriptionStatus = 'Fulfill' AND Year(SubscriptionEntryDate) = ? GROUP BY YEAR(SubscriptionEntryDate), MONTH(SubscriptionEntryDate) ORDER BY MONTH(str_to_date(MONTHS, '%M'));`;
 
   connection.query(query, [selectedYear], (error, result) => {
     if (error) return res.status(400).json({ error: error, status: 400 });
@@ -47,7 +47,7 @@ const getMonthlySessionUserGrowthRateController = (
   @last_entry := TotalSalesPerMonth
   from
   (select @last_entry := 0) x,
-  (SELECT SubscriptionAmount, SubscriptionType, SubscriptionEntryDate, ROUND(SUM(COALESCE(SubscriptionAmount, 0)), 2) AS 'TotalSalesPerMonth' FROM tbl_subscriptions WHERE SubscriptionType = 'Session' AND SubscriptionStatus = 'Fulfill' AND Year(SubscriptionEntryDate) = ? GROUP BY YEAR(SubscriptionEntryDate), MONTH(SubscriptionEntryDate)) y`;
+  (SELECT SubscriptionAmount, SubscriptionType, SubscriptionEntryDate, ROUND(SUM(COALESCE(SubscriptionAmount, 0)), 2) AS 'TotalSalesPerMonth' FROM tbl_subscriptions WHERE SubscriptionType = 'Session' AND SubscriptionStatus = 'Fulfill' AND Year(SubscriptionEntryDate) = ? GROUP BY YEAR(SubscriptionEntryDate), MONTH(SubscriptionEntryDate)) y ORDER BY MONTH(str_to_date(MONTHS, '%M'))`;
 
   connection.query(query, [selectedYear], (error, result) => {
     if (error) return res.status(400).json({ error: error, status: 400 });
@@ -66,7 +66,7 @@ const getMonthlyMUserGrowthRateController = (req: Request, res: Response) => {
   @last_entry := TotalSalesPerMonth
   from
   (select @last_entry := 0) x,
-  (SELECT SubscriptionAmount, SubscriptionType, SubscriptionEntryDate, ROUND(SUM(COALESCE(SubscriptionAmount, 0)), 2) AS 'TotalSalesPerMonth' FROM tbl_subscriptions WHERE SubscriptionType = 'Monthly' AND SubscriptionStatus = 'Fulfill' AND Year(SubscriptionEntryDate) = ? GROUP BY YEAR(SubscriptionEntryDate), MONTH(SubscriptionEntryDate)) y`;
+  (SELECT SubscriptionAmount, SubscriptionType, SubscriptionEntryDate, ROUND(SUM(COALESCE(SubscriptionAmount, 0)), 2) AS 'TotalSalesPerMonth' FROM tbl_subscriptions WHERE SubscriptionType = 'Monthly' AND SubscriptionStatus = 'Fulfill' AND Year(SubscriptionEntryDate) = ? GROUP BY YEAR(SubscriptionEntryDate), MONTH(SubscriptionEntryDate)) y ORDER BY MONTH(str_to_date(MONTHS, '%M'))`;
 
   connection.query(query, [selectedYear], (error, result) => {
     if (error) return res.status(400).json({ error: error, status: 400 });
@@ -84,7 +84,7 @@ const getWeeklySessionUserSalesController = (req: Request, res: Response) => {
 
   SET @StartDate = DATE_SUB(DATE(CONCAT("2024-",@formatDate, "-01")),INTERVAL (DAY(DATE(CONCAT("2024-",@formatDate, "-01")))-1) DAY);
   SET @EndDate = LAST_DAY(DATE_ADD(CONCAT("2024-",@formatDate, "-01"), INTERVAL - 0 MONTH));
-  SELECT SubscriptionType, concat('Week ',week(SubscriptionEntryDate)) as 'Week', ROUND(sum(SubscriptionAmount), 2) as 'TotalSalesPerWeek' from tbl_subscriptions where (SubscriptionEntryDate >= @StartDate and SubscriptionEntryDate <= @EndDate) AND SubscriptionType = 'Session' AND SubscriptionStatus = 'Fulfill' AND DATE_FORMAT(SubscriptionEntryDate, "%M") = ? group by week(SubscriptionEntryDate);`;
+  SELECT SubscriptionType, concat('Week ',week(SubscriptionEntryDate)) as 'Week', ROUND(sum(SubscriptionAmount), 2) as 'TotalSalesPerWeek' from tbl_subscriptions where (SubscriptionEntryDate >= @StartDate and SubscriptionEntryDate <= @EndDate) AND SubscriptionType = 'Session' AND SubscriptionStatus = 'Fulfill' AND DATE_FORMAT(SubscriptionEntryDate, "%M") = ? group by week(SubscriptionEntryDate) ORDER BY WEEK;`;
 
   connection.query(query, [selectedMonth, selectedMonth], (error, result) => {
     if (error) return res.status(400).json({ error: error, status: 400 });
@@ -102,7 +102,7 @@ const getWeeklyMonthlyUserSalesController = (req: Request, res: Response) => {
 
   SET @StartDate = DATE_SUB(DATE(CONCAT("2024-",@formatDate, "-01")),INTERVAL (DAY(DATE(CONCAT("2024-",@formatDate, "-01")))-1) DAY);
   SET @EndDate = LAST_DAY(DATE_ADD(CONCAT("2024-",@formatDate, "-01"), INTERVAL - 0 MONTH));
-  SELECT SubscriptionType, concat('Week ',week(SubscriptionEntryDate)) as 'Week', ROUND(sum(SubscriptionAmount), 2) as 'TotalSalesPerWeek' from tbl_subscriptions where (SubscriptionEntryDate >= @StartDate and SubscriptionEntryDate <= @EndDate) AND SubscriptionType = 'Monthly' AND SubscriptionStatus = 'Fulfill' AND DATE_FORMAT(SubscriptionEntryDate, "%M") = ? group by week(SubscriptionEntryDate);`;
+  SELECT SubscriptionType, concat('Week ',week(SubscriptionEntryDate)) as 'Week', ROUND(sum(SubscriptionAmount), 2) as 'TotalSalesPerWeek' from tbl_subscriptions where (SubscriptionEntryDate >= @StartDate and SubscriptionEntryDate <= @EndDate) AND SubscriptionType = 'Monthly' AND SubscriptionStatus = 'Fulfill' AND DATE_FORMAT(SubscriptionEntryDate, "%M") = ? group by week(SubscriptionEntryDate) ORDER BY WEEK;`;
 
   connection.query(query, [selectedMonth, selectedMonth], (error, result) => {
     if (error) return res.status(400).json({ error: error, status: 400 });
@@ -128,7 +128,7 @@ const getWeeklyMonthlyUserGrowthRateController = (
       @last_entry := TotalSalesPerWeek
       from
       (select @last_entry := 0) x,
-      (SELECT SubscriptionType, SubscriptionEntryDate, concat('Week ',week(SubscriptionEntryDate)) as 'Week', ROUND(sum(SubscriptionAmount), 2) as 'TotalSalesPerWeek' from tbl_subscriptions where (SubscriptionEntryDate >= @StartDate and SubscriptionEntryDate <= @EndDate) AND SubscriptionType = 'Monthly' AND SubscriptionStatus = 'Fulfill' AND DATE_FORMAT(SubscriptionEntryDate, "%M") = '${selectedMonth}' group by week(SubscriptionEntryDate)) y`;
+      (SELECT SubscriptionType, SubscriptionEntryDate, concat('Week ',week(SubscriptionEntryDate)) as 'Week', ROUND(sum(SubscriptionAmount), 2) as 'TotalSalesPerWeek' from tbl_subscriptions where (SubscriptionEntryDate >= @StartDate and SubscriptionEntryDate <= @EndDate) AND SubscriptionType = 'Monthly' AND SubscriptionStatus = 'Fulfill' AND DATE_FORMAT(SubscriptionEntryDate, "%M") = '${selectedMonth}' group by week(SubscriptionEntryDate)) y ORDER BY WEEK`;
 
   connection.query(query, [selectedMonth, selectedMonth], (error, result) => {
     if (error) return res.status(400).json({ error: error, status: 400 });
@@ -155,7 +155,7 @@ const getWeeklySessionUserGrowthRateController = (
       @last_entry := TotalSalesPerWeek
       from
       (select @last_entry := 0) x,
-      (SELECT SubscriptionType, SubscriptionEntryDate, concat('Week ',week(SubscriptionEntryDate)) as 'Week', ROUND(sum(SubscriptionAmount), 2) as 'TotalSalesPerWeek' from tbl_subscriptions where (SubscriptionEntryDate >= @StartDate and SubscriptionEntryDate <= @EndDate) AND SubscriptionType = 'Session' AND SubscriptionStatus = 'Fulfill' AND DATE_FORMAT(SubscriptionEntryDate, "%M") = '${selectedMonth}' group by week(SubscriptionEntryDate)) y`;
+      (SELECT SubscriptionType, SubscriptionEntryDate, concat('Week ',week(SubscriptionEntryDate)) as 'Week', ROUND(sum(SubscriptionAmount), 2) as 'TotalSalesPerWeek' from tbl_subscriptions where (SubscriptionEntryDate >= @StartDate and SubscriptionEntryDate <= @EndDate) AND SubscriptionType = 'Session' AND SubscriptionStatus = 'Fulfill' AND DATE_FORMAT(SubscriptionEntryDate, "%M") = '${selectedMonth}' group by week(SubscriptionEntryDate)) y ORDER BY WEEK`;
 
   connection.query(query, [selectedMonth, selectedMonth], (error, result) => {
     if (error) return res.status(400).json({ error: error, status: 400 });

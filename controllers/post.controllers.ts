@@ -8,6 +8,14 @@ import {
   specific_post_validator,
 } from "../utils/validations/post.validations";
 import clients from "../global/socket.global";
+import BadWordsNext from "bad-words-next";
+
+const en = require("bad-words-next/data/en.json");
+const fil = require("bad-words-next/data/fil.json");
+const badwords = new BadWordsNext();
+
+badwords.add(en);
+badwords.add(fil);
 
 const getSpecificPostController = (req: Request, res: Response) => {
   const UserID = req.params.UserID.split(":")[1];
@@ -66,28 +74,28 @@ const createPostController = (req: Request, res: Response) => {
   const values = [
     UserID,
     PostImage,
-    PostTitle,
-    PostDescription,
+    badwords.filter(PostTitle),
+    badwords.filter(PostDescription),
     PostDate,
     PostAuthor,
   ];
   const query =
-    "INSERT INTO tbl_posts (`UserID`, `PostImage`, `PostTitle`,`PostDescription`, `PostDate`, `PostAuthor`, `Username`) VALUES (?, ?, ?, ?, ?, ?, ?) LIMIT 1; SET @LAST_ID_IN_TBL_POSTS = LAST_INSERT_ID(); INSERT INTO tbl_newsfeed (`UserID`, `PostID`, `PostImage`, `PostTitle`, `PostDescription`, `PostDate`, `PostAuthor`, `Username`) VALUES (?, @LAST_ID_IN_TBL_POSTS, ?, ?, ?, ?, ?, ?) LIMIT 1; ";
+    "INSERT INTO tbl_posts (`UserID`, `PostImage`, `PostTitle`,`PostDescription`, `PostDate`, `PostAuthor`, `Username`) VALUES (?, ?, ?, ?, ?, ?, ?); SET @LAST_ID_IN_TBL_POSTS = LAST_INSERT_ID(); INSERT INTO tbl_newsfeed (`UserID`, `PostID`, `PostImage`, `PostTitle`, `PostDescription`, `PostDate`, `PostAuthor`, `Username`) VALUES (?, @LAST_ID_IN_TBL_POSTS, ?, ?, ?, ?, ?, ?); ";
 
   connection.query(
     query,
     [
       UserID,
       PostImage,
-      PostTitle,
-      PostDescription,
+      badwords.filter(PostTitle),
+      badwords.filter(PostDescription),
       PostDate,
       PostAuthor,
       Username,
       UserID,
       PostImage,
-      PostTitle,
-      PostDescription,
+      badwords.filter(PostTitle),
+      badwords.filter(PostDescription),
       PostDate,
       PostAuthor,
       Username,
@@ -145,15 +153,15 @@ const editPostController = (req: Request, res: Response) => {
     query,
     [
       PostImage,
-      PostTitle,
-      PostDescription,
+      badwords.filter(PostTitle),
+      badwords.filter(PostDescription),
       PostDate,
       PostAuthor,
       Username,
       PostID,
       PostImage,
-      PostTitle,
-      PostDescription,
+      badwords.filter(PostTitle),
+      badwords.filter(PostDescription),
       PostDate,
       PostAuthor,
       Username,

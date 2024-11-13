@@ -7,7 +7,12 @@ import {
   delete_suggested_validator,
 } from "../utils/validations/program_suggested.validations";
 import clients from "../global/socket.global";
-
+import BadWordsNext from "bad-words-next";
+const en = require("bad-words-next/data/en.json");
+const fil = require("bad-words-next/data/fil.json");
+const filter = new BadWordsNext();
+filter.add(en);
+filter.add(fil);
 const getProgramSuggested = (req: Request, res: Response) => {
   const query =
     "SELECT * from tbl_program_suggested ORDER BY `SuggestedProgramEntryDate` DESC;";
@@ -57,11 +62,11 @@ const createProgramSuggested = (req: Request, res: Response) => {
     });
   }
   const query =
-    "INSERT INTO tbl_program_suggested (`SuggestedProgramTitle`, `SuggestedProgramDescription`, `SuggestedProgramEntryDate`) VALUES (?) LIMIT 1;";
+    "INSERT INTO tbl_program_suggested (`SuggestedProgramTitle`, `SuggestedProgramDescription`, `SuggestedProgramEntryDate`) VALUES (?);";
 
   const values = [
-    SuggestedProgramTitle,
-    SuggestedProgramDescription,
+    filter.filter(SuggestedProgramTitle),
+    filter.filter(SuggestedProgramDescription),
     SuggestedProgramEntryDate,
   ];
   connection.query(query, [values], (error, result) => {
@@ -105,8 +110,8 @@ const editProgramSuggested = (req: Request, res: Response) => {
   connection.query(
     query,
     [
-      SuggestedProgramTitle,
-      SuggestedProgramDescription,
+      filter.filter(SuggestedProgramTitle),
+      filter.filter(SuggestedProgramDescription),
       SuggestedProgramEntryDate,
       SuggestedProgramID,
     ],

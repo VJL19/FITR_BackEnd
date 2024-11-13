@@ -6,12 +6,19 @@ import {
   comment_post_validator,
   create_post_validator_feed,
   delete_post_validator_feed,
+  edit_comment_post_validator,
   get_comment_post_validator,
   like_post_validator,
   unlike_post_validator,
 } from "../utils/validations/newsfeed.validations";
 import clients from "../global/socket.global";
+import BadWordsNext from "bad-words-next";
+const en = require("bad-words-next/data/en.json");
+const fil = require("bad-words-next/data/fil.json");
+const badwords = new BadWordsNext();
 
+badwords.add(en);
+badwords.add(fil);
 const createPostsFromFeedController = (req: Request, res: Response) => {
   const {
     UserID,
@@ -103,15 +110,7 @@ const getAllPostsController = (req: Request, res: Response) => {
 };
 
 const getSpecificPostsController = (req: Request, res: Response) => {
-  const {
-    UserID,
-    PostIsLike,
-    PostLikes,
-    PostImage,
-    NewsfeedID,
-    PostTitle,
-    PostComments,
-  } = <INewsFeed>req.body;
+  const NewsfeedID = req.params.NewsfeedID.split(":")[1];
 
   const query = "SELECT * FROM tbl_newsfeed WHERE `NewsfeedID` = ? LIMIT 1";
 
@@ -222,7 +221,7 @@ const commentPostController = (req: Request, res: Response) => {
   const { CommentText, UserID, NewsfeedID, CommentDate } = <ICommments>req.body;
 
   const query =
-    "INSERT INTO tbl_comments (`CommentText`, `UserID`, `NewsfeedID`, `CommentDate`) VALUES (?) LIMIT 1;";
+    "INSERT INTO tbl_comments (`CommentText`, `UserID`, `NewsfeedID`, `CommentDate`) VALUES (?);";
 
   const validate_comment = comment_post_validator.validate({
     CommentText,
@@ -237,11 +236,15 @@ const commentPostController = (req: Request, res: Response) => {
       status: 400,
     });
   }
-  const values = [CommentText, UserID, NewsfeedID, CommentDate];
+  const values = [
+    badwords.filter(CommentText),
+    UserID,
+    NewsfeedID,
+    CommentDate,
+  ];
   connection.query(query, [values], (error, result) => {
     if (error) return res.status(400).json({ error: error, status: 400 });
 
-    console.log("comment on post", result);
     for (var i in clients) {
       clients[i].emit("refresh_post");
     }
@@ -252,10 +255,45 @@ const commentPostController = (req: Request, res: Response) => {
     });
   });
 };
+const editCommentPostsController = (req: Request, res: Response) => {
+  const { CommentID, CommentText, CommentDate } = <ICommments>req.body;
+
+  const query =
+    "UPDATE tbl_comments SET CommentText = ?, CommentDate = ? WHERE CommentID = ? LIMIT 1;";
+
+  const validate_comment = edit_comment_post_validator.validate({
+    CommentID,
+    CommentText,
+    CommentDate,
+  });
+
+  if (validate_comment.error) {
+    return res.status(400).json({
+      error: validate_comment.error.details[0].message,
+      status: 400,
+    });
+  }
+  connection.query(
+    query,
+    [badwords.filter(CommentText), CommentDate, CommentID],
+    (error, result) => {
+      if (error) return res.status(400).json({ error: error, status: 400 });
+
+      for (var i in clients) {
+        clients[i].emit("refresh_post");
+      }
+      return res.status(200).json({
+        message: "edit comment on this post successfully!",
+        status: 200,
+        result: result,
+      });
+    }
+  );
+};
 
 const getAllCommentPostsController = (req: Request, res: Response) => {
   const NewsfeedID = req.params.NewsfeedID.split(":")[1];
-  
+
   const query =
     "SELECT c.UserID, c.NewsfeedID, c.CommentID, c.CommentText, c.CommentDate, u.Username, u.ProfilePic FROM tbl_comments c LEFT JOIN tbl_users u ON c.UserID = u.UserID WHERE c.NewsfeedID = ? ORDER BY c.CommentDate DESC;";
 
@@ -286,6 +324,23 @@ const removeUserComments = (req: Request, res: Response) => {
   const query = "DELETE FROM tbl_comments WHERE `NewsfeedID` = ? LIMIT 1;";
 
   connection.query(query, [NewsfeedID], (error, result) => {
+    if (error) return res.status(400).json({ error: error, status: 400 });
+
+    console.log("delete user comment on this post!", result);
+    return res.status(200).json({
+      message: "Removed comment successfully!",
+      status: 200,
+      result: result,
+    });
+  });
+};
+
+const removeUserSpecificComment = (req: Request, res: Response) => {
+  const CommentID = req.params.CommentID.split(":")[1];
+
+  const query = "DELETE FROM tbl_comments WHERE `CommentID` = ? LIMIT 1;";
+
+  connection.query(query, [CommentID], (error, result) => {
     if (error) return res.status(400).json({ error: error, status: 400 });
 
     console.log("delete user comment on this post!", result);
@@ -350,6 +405,7 @@ export {
   getAllCommentPostsController,
   getAllPostsController,
   getSpecificPostsController,
+  editCommentPostsController,
   getPostLikes,
   getPostComments,
   likePostController,
@@ -357,5 +413,6 @@ export {
   commentPostController,
   checkLikePostController,
   removeUserComments,
+  removeUserSpecificComment,
   removeUserLikes,
 };

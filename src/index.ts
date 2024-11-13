@@ -38,16 +38,9 @@ import IUser from "../utils/types/user.types";
 import { MysqlError } from "mysql";
 //initialize the top of the function express.
 const app = express();
+const config = loadConfig();
 
 const server = http.createServer(app);
-const io = new Server(server, {
-  cors: {
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true,
-    //Insert origin of native url here...
-    origin: ["http://localhost:8081", "http://localhost:5173"],
-  },
-});
 
 //schedule a task to run every minute to call database and check whether user subscription monthly is end near or 1 day before.
 // cron.schedule("*/1 * * * *", () => {
@@ -62,17 +55,33 @@ const io = new Server(server, {
 //   });
 // });
 
-const config = loadConfig();
 //middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(
-  cors({
+const io = new Server(server, {
+  cors: {
+    origin: [
+      "http://localhost:5173",
+      "https://db52-136-158-2-214.ngrok-free.app",
+    ],
+    allowedHeaders: ["ngrok-skip-browser-warning"],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
     //Insert origin of native url here...
-    origin: ["http://localhost:8081", "http://localhost:5173"],
+  },
+});
+
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "https://db52-136-158-2-214.ngrok-free.app",
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+
+    credentials: true,
+    //Insert origin of native url here...
   })
 );
 

@@ -775,6 +775,31 @@ const sendEmailController = async (req: Request, res: Response) => {
       .json({ message: "An error is occured!", error: err });
   }
 };
+const sendEmailForSubscriptionController = async (
+  req: Request,
+  res: Response
+) => {
+  const { Email } = <IUser>req.body;
+
+  const generatedCode = generateNum();
+  try {
+    const emailRes = await sendEmail({
+      paymentConfirmation: true,
+      email: Email,
+      code: generatedCode,
+      subject: "PAYMENT VERIFICATION",
+      emailTitle: "OTP VERIFICATION CODE",
+      emailDescription:
+        "Enter the generate OTP below to verify first your account holder in our FITR application. Note: Please don't distribute this code from anyone.",
+    });
+
+    return res.status(200).json({ result: emailRes, code: generatedCode });
+  } catch (err) {
+    return res
+      .status(400)
+      .json({ message: "An error is occured!", error: err });
+  }
+};
 const adminChangeAccountController = async (req: Request, res: Response) => {
   const { Email } = <IUser>req.body;
 
@@ -877,6 +902,7 @@ export {
   logoutController,
   editUserController,
   sendEmailController,
+  sendEmailForSubscriptionController,
   getUsersController,
   getTotalUserController,
   getTotalSessionUserController,

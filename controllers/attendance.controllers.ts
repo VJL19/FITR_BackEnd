@@ -57,7 +57,7 @@ const checkUserRFIDExist = (req: Request, res: Response) => {
       return res.status(400).json({
         status: 401,
         message:
-          "This RFID Status is not active! Please contact gym owner to change for this RFID status!",
+          "This RFID Card Status nor not active or expired already! Please contact gym owner to change for this RFID status!",
       });
     }
 
@@ -121,7 +121,7 @@ const createUserRecordController = (req: Request, res: Response) => {
     });
   }
   const query =
-    "INSERT INTO tbl_attendance (`UserID`, `ProfilePic`, `LastName`, `FirstName`, `SubscriptionType`, `TimeIn`, `TimeOut`, `DateTapped`, `SubscriptionExpectedEnd`, `IsPaid`) VALUES (?) LIMIT 1;";
+    "INSERT INTO tbl_attendance (`UserID`, `ProfilePic`, `LastName`, `FirstName`, `SubscriptionType`, `TimeIn`, `TimeOut`, `DateTapped`, `SubscriptionExpectedEnd`, `IsPaid`) VALUES (?);";
 
   const values = [
     null,
@@ -243,7 +243,7 @@ const tapRFIDCardController = (req: Request, res: Response) => {
         });
       }
       const query =
-        "INSERT INTO tbl_attendance (`UserID`, `ProfilePic`, `LastName`, `FirstName`, `SubscriptionType`, `TimeIn`, `TimeOut`, `DateTapped`, `SubscriptionExpectedEnd`,`IsPaid`) VALUES (?) LIMIT 1; SELECT * from tbl_users WHERE `UserID` = ? LIMIT 1;";
+        "INSERT INTO tbl_attendance (`UserID`, `ProfilePic`, `LastName`, `FirstName`, `SubscriptionType`, `TimeIn`, `TimeOut`, `DateTapped`, `SubscriptionExpectedEnd`,`IsPaid`) VALUES (?); SELECT * from tbl_users WHERE `UserID` = ? LIMIT 1;";
       const values = [
         UserID,
         ProfilePic,
@@ -281,11 +281,11 @@ const tapRFIDCardController = (req: Request, res: Response) => {
     if (result.length === 1) {
       const updateTimeOut = `UPDATE tbl_attendance SET TimeOut = '${formatTime(
         new Date()
-      )}' WHERE UserID = ? ORDER BY AttendanceID DESC LIMIT 1;SELECT * from tbl_users WHERE UserID = ? LIMIT 1;`;
+      )}' WHERE UserID = ? ORDER BY AttendanceID DESC LIMIT 1;SELECT * from tbl_users WHERE UserID = ? LIMIT 1;UPDATE tbl_users SET IsRFIDActive = 'Not Active' WHERE UserID = ? AND SubscriptionType = 'Session' LIMIT 1;`;
 
       connection.query(
         updateTimeOut,
-        [UserID, UserID],
+        [UserID, UserID, UserID],
         async (error, result: IUser[][]) => {
           if (error) return res.status(400).json({ error: error, status: 400 });
 
