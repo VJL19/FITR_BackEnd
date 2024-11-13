@@ -89,6 +89,10 @@ app.use(
   })
 );
 
+app.get("/", (req, res) => {
+  res.json("Working FITR BackEnd");
+});
+
 //start the io connection
 io.on("connection", (socket) => {
   console.log(`USER ${socket.id} is connected to the server!`);
