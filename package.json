@@ -41,6 +41,8 @@
     "@types/mysql": "^2.15.26",
     "@types/node": "^20.12.5",
     "@types/node-cron": "^3.0.11",
-    "@types/nodemailer": "^6.4.15"
+    "@types/nodemailer": "^6.4.15",
+    "pre-commit": "^1.2.2",
+    "rimraf": "^6.0.1"
   }
 }

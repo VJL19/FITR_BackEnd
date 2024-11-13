@@ -188,3 +188,4 @@ app.use("/api/v1/user/subscription", user_subscription_routes);
 server.listen(config.PORT, () => {
   console.log(`SERVER IS LISTENING ON PORT ${config.PORT}`);
 });
+export default app;
