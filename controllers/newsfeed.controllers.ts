@@ -45,7 +45,7 @@ const createPostsFromFeedController = (req: Request, res: Response) => {
       .json({ error: validate_fields.error.details[0].message, status: 400 });
   }
   const query =
-    "INSERT INTO tbl_newsfeed (`UserID`, `PostID`, `PostImage`, `PostTitle`, `PostDescription`, `PostDate`, `PostAuthor`) VALUES (?, (SELECT PostID FROM tbl_posts ORDER BY PostID DESC LIMIT 1), ?, ?, ?, ?, ?) LIMIT 1;";
+    "INSERT INTO tbl_newsfeed (`UserID`, `PostID`, `PostImage`, `PostTitle`, `PostDescription`, `PostDate`, `PostAuthor`) VALUES (?, (SELECT PostID FROM tbl_posts ORDER BY PostID DESC LIMIT 1), ?, ?, ?, ?, ?);";
 
   const values = [
     UserID,
@@ -141,7 +141,7 @@ const likePostController = (req: Request, res: Response) => {
     });
   }
 
-  const query = `SET @LIKES = 0; INSERT INTO tbl_likes (UserID, NewsfeedID, PostLikes, PostIsLike) VALUES (?, ?,@LIKES := @LIKES + 1, 'liked') LIMIT 1;`;
+  const query = `SET @LIKES = 0; INSERT INTO tbl_likes (UserID, NewsfeedID, PostLikes, PostIsLike) VALUES (?, ?,@LIKES := @LIKES + 1, 'liked');`;
 
   connection.query(query, [UserID, NewsfeedID, PostLikes], (error, result) => {
     if (error) {
