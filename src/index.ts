@@ -56,6 +56,11 @@ const server = http.createServer(app);
 // });
 
 //middlewares
+app.use((req, res, next) => {
+  res.setHeader("Connection", "keep-alive");
+  next();
+});
+server.setTimeout(0); //disabled idle timeout
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());

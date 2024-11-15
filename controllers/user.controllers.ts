@@ -117,6 +117,9 @@ const registerController = async (
         .status(400)
         .json({ message: error.sqlMessage, status: 400, error: error });
     // next();
+    for (var i in clients) {
+      clients[i].emit("refresh_userLists");
+    }
     return res.json({ message: "Successfully register!", status: 200 });
   });
 };
@@ -202,7 +205,9 @@ const adminRegisterUserController = async (req: Request, res: Response) => {
   connection.query(query, [values], (error, result: IUser[]) => {
     if (error)
       return res.status(400).json({ message: error.sqlMessage, error: error });
-
+    for (var i in clients) {
+      clients[i].emit("refresh_userLists");
+    }
     return res.status(200).json({ message: "Successfully register user!" });
   });
 };
